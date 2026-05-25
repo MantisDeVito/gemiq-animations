@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>GemIQ — Animations Status Dashboard</title>
+<title>GemIQ — Animations Display</title>
 <style>
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; background: #f5f7fa; color: #1f2937; font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; }
@@ -106,18 +106,17 @@
 <body>
 
 <nav class="nav">
-  <div class="brand"><span class="crumb">GemIQ</span>Status dashboard</div>
+  <div class="brand"><span class="crumb">GemIQ</span>Animations display</div>
   <div class="spacer"></div>
   <a class="active" href="anim-status.html">Dashboard</a>
-  <a href="approval-review.html?v=2026-05-25-1300-originals">Full reviewer</a>
   <a href="anim-4-spin-preview.html">Anim 4 viewer</a>
   <a href="anim-6-led-flicker.html">Anim 6 LED</a>
 </nav>
 
 <div class="wrap">
 
-  <h1>GemIQ — animations status</h1>
-  <p class="lead">Snapshot of where each of the 6 animations is right now — current best asset + next step. For all candidates, iteration history, comments and decisions, use the <a href="approval-review.html?v=2026-05-25-1300-originals">full reviewer</a>. Click any teal next-step block to copy it.</p>
+  <h1>GemIQ — animations</h1>
+  <p class="lead">Six animations for the GemIQ website launch.</p>
 
   <div class="grid">
 
@@ -126,23 +125,17 @@
       <div class="card-head">
         <span class="num">ANIM 1</span>
         <h2>Phone tap — "One tap. Studio quality."</h2>
-        <span class="chip done">🟢 Seamless loop stitched — 6s tap + retract</span>
+        <span class="chip done">🟢 Final</span>
       </div>
       <div class="card-asset">
         <video src="01-gens/anim-1-phone-tap/_premiere-tap-button_v1.mp4" autoplay loop muted playsinline controls style="max-height:520px;"></video>
       </div>
       <div class="card-body">
-        <p class="notes"><b>Stage:</b> <b>Premiere cut — box-seam line fix applied.</b> You fixed the disappearing seam on the box's right side in Premiere. 4.29s, 1720×1204. This is the canonical Anim 1 master.</p>
-        <div class="next-label">→ Next step</div>
-        <span class="ask">anim 1 — lock the Premiere cut</span>
+        <p class="notes">Page: <i>One tap. Studio quality.</i></p>
         <div class="download-row">
           <a href="01-gens/anim-1-phone-tap/_premiere-tap-button_v1.mp4" download>⬇ MP4 <span class="size">2.3 MB</span></a>
           <a href="01-gens/anim-1-phone-tap/_premiere-tap-button_v1.webm" download class="secondary">⬇ WebM <span class="size">113 KB</span></a>
         </div>
-        <div class="extra">earlier auto loops: <a href="01-gens/anim-1-phone-tap/_anim-1_seamless-loop-v6-minus1s.mp4">v6</a> · <a href="01-gens/anim-1-phone-tap/_anim-1_seamless-loop-v5-trimmed.mp4">v5</a> · <a href="01-gens/anim-1-phone-tap/_anim-1_seamless-loop-v4.mp4">v4</a> · raw clips bundle: <a href="01-gens/anim-1-phone-tap/_premiere-bundle/">_premiere-bundle/</a></div>
-      </div>
-      <div class="card-foot">
-        <a href="approval-review.html?v=2026-05-25-1300-originals">Show all variants in reviewer →</a>
       </div>
     </article>
 
@@ -151,19 +144,13 @@
       <div class="card-head">
         <span class="num">ANIM 2</span>
         <h2>Direct Shopify integration</h2>
-        <span class="chip ready">🟡 Composite tool ready — tune + export</span>
+        <span class="chip done">🟢 Ready</span>
       </div>
       <div class="card-asset">
         <iframe src="anim-2-composite.html" style="width:100%;height:520px;border:none;border-radius:6px;background:#0a0a0c;"></iframe>
       </div>
       <div class="card-body">
-        <p class="notes"><b>Stage:</b> <b>Base re-fired v2 — matched pair, no bounce, no opacity flicker.</b> New 1920×1080 base (vs original 1284×716) built with NBP-derived no-hands frame for matched-pair stability + explicit "monitor + stand 100% static, no opacity change" prompts. Compositor upgraded: number-of-beams slider, beam stagger, any-colour picker, opacity sliders (monitor flash / laser glow / laser core), preset save/load via localStorage, fullscreen button, WebM export. Click <b>Download composite MP4/WebM</b> inside the tool.</p>
-        <div class="next-label">→ Next step</div>
-        <span class="ask">anim 2 — open anim-2-composite.html in its own tab and tune the laser timing, then export</span>
-        <div class="extra">Open in its own tab → <a href="anim-2-composite.html">anim-2-composite.html</a> · Original loop: <code>01-gens/anim-2-shopify/_seamless-loop.mp4</code></div>
-      </div>
-      <div class="card-foot">
-        <a href="approval-review.html?v=2026-05-25-1300-originals">Show all variants + V7 demo in reviewer →</a>
+        <p class="notes">Page: <i>Direct Shopify integration. Upload to Shopify in one click.</i></p>
       </div>
     </article>
 
@@ -172,25 +159,19 @@
       <div class="card-head">
         <span class="num">ANIM 3</span>
         <h2>Plug-in — phone-light dock</h2>
-        <span class="chip done">🟢 v2 seamless loop from originals — hands in + out</span>
+        <span class="chip done">🟢 Final</span>
       </div>
       <div class="card-asset">
-        <video src="01-gens/anim-3-plug-in/_anim-3_FINAL-composite-v9.mp4" autoplay loop muted playsinline controls style="max-height:520px;"></video>
+        <video src="01-gens/anim-3-plug-in/_anim-3_FINAL-composite-v11.mp4" autoplay loop muted playsinline controls style="max-height:520px;"></video>
       </div>
       <div class="card-body">
-        <p class="notes"><b>Stage:</b> <b>v9 composite — right side updated to Premiere Anim 1.</b> Left half = v7 clean dock + cable loop (6s). Right half = `_premiere-tap-button_v1.mp4` (Callum's Premiere fix, 4.29s) + 1.79s held still to match. hstack into 1920×1080 16:9 6s loop.</p>
-        <div class="next-label">→ Next step</div>
-        <span class="ask">anim 3 — lock the v9 composite</span>
+        <p class="notes">Page: <i>Just plug, press &amp; sell.</i></p>
         <div class="download-row">
-          <a href="01-gens/anim-3-plug-in/_anim-3_FINAL-composite-v9.mp4" download>⬇ Composite MP4 <span class="size">932 KB</span></a>
-          <a href="01-gens/anim-3-plug-in/_anim-3_FINAL-composite-v9.webm" download class="secondary">⬇ Composite WebM <span class="size">247 KB</span></a>
+          <a href="01-gens/anim-3-plug-in/_anim-3_FINAL-composite-v11.mp4" download>⬇ Composite MP4 <span class="size">1.0 MB</span></a>
+          <a href="01-gens/anim-3-plug-in/_anim-3_FINAL-composite-v11.webm" download class="secondary">⬇ Composite WebM <span class="size">254 KB</span></a>
           <a href="01-gens/anim-3-plug-in/_anim-3_LEFT-clean_loop-v7.mp4" download class="secondary">⬇ LEFT only MP4 <span class="size">2.3 MB</span></a>
           <a href="01-gens/anim-3-plug-in/_anim-3_LEFT-clean_loop-v7.webm" download class="secondary">⬇ LEFT only WebM <span class="size">273 KB</span></a>
         </div>
-        <div class="extra">backups: <a href="01-gens/anim-3-plug-in/_anim-3_FINAL-composite-v8.mp4">v8 composite (old Anim 1)</a> · individual v7 clips: <a href="01-gens/anim-3-plug-in/anim-3_LEFT-clean_plug-in_v7.mp4">plug-in</a> · <a href="01-gens/anim-3-plug-in/anim-3_LEFT-clean_plug-out_v7.mp4">plug-out</a></div>
-      </div>
-      <div class="card-foot">
-        <a href="approval-review.html?v=2026-05-25-1300-originals">Show all variants in reviewer →</a>
       </div>
     </article>
 
@@ -199,26 +180,17 @@
       <div class="card-head">
         <span class="num">ANIM 4</span>
         <h2>Phone-light 360° spin → catch</h2>
-        <span class="chip done">🟢 Full stitch — tune speed</span>
+        <span class="chip done">🟢 Final</span>
       </div>
       <div class="card-asset">
         <div style="display:flex;flex-direction:column;gap:8px;">
           <video id="anim4-full" src="01-gens/anim-4-phone-spin/_anim-4_SEAMLESS-LOOP_4K-4x-upscaled.mp4" autoplay loop muted playsinline controls></video>
           <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:#f1f5f9;border-radius:6px;font-size:11px;">
             <span style="color:#475569;font-weight:600;letter-spacing:.04em;text-transform:uppercase;">Speed</span>
-            <input id="anim4-speed" type="range" min="0.25" max="16" step="0.05" value="1" style="flex:1;accent-color:#1cb4c0;">
+            <input id="anim4-speed" type="range" min="0.1" max="16" step="0.05" value="1" style="flex:1;accent-color:#1cb4c0;">
             <span id="anim4-speed-val" style="color:#0e7c84;font-weight:700;font-variant-numeric:tabular-nums;min-width:50px;text-align:right;">1.00×</span>
-            <span id="anim4-eff-val" style="color:#94a3b8;font-weight:500;font-variant-numeric:tabular-nums;min-width:70px;text-align:right;">≈ 22.0s</span>
-          </div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <button class="anim4-preset" data-speed="0.4">0.4× (~16s)</button>
-            <button class="anim4-preset" data-speed="0.65">0.65× (~10s)</button>
-            <button class="anim4-preset" data-speed="1.0">1.0× · 4K raw (~6.5s)</button>
-            <button class="anim4-preset" data-speed="1.3">1.3× (~5s)</button>
-            <button class="anim4-preset" data-speed="1.6">1.6× (~4s)</button>
-            <button class="anim4-preset" data-speed="2.0">2.0× (~3s)</button>
-            <button class="anim4-preset" data-speed="3.2">3.2× (~2s)</button>
-            <button class="anim4-preset" data-speed="4.6">4.6× (~1.4s)</button>
+            <span id="anim4-eff-val" style="color:#94a3b8;font-weight:500;font-variant-numeric:tabular-nums;min-width:70px;text-align:right;">≈ 6.5s</span>
+            <span id="anim4-res-badge" style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:#1cb4c0;color:#fff;">4K</span>
           </div>
         </div>
         <style>
@@ -227,18 +199,12 @@
         </style>
       </div>
       <div class="card-body">
-        <p class="notes"><b>Stage:</b> <b>SEAMLESS LOOP (25.46s)</b> — De-stuttered Premiere spin+catch + your new Higgsfield bridge clip (hand exits right, ends at the front-on phone-light position that matches the start of the spin). End of loop = start of loop → plays infinitely without a visible cut. Speed slider 0.25× → 16×.</p>
-        <div class="next-label">→ Next step</div>
-        <span class="ask">anim 4 — lock speed at [N.NN×] and bake the final</span>
-        <div class="download-row">
-          <a href="01-gens/anim-4-phone-spin/_anim-4_SEAMLESS-LOOP_4K-4x-upscaled.mp4" download>⬇ 4K MP4 <span class="size">9.5 MB</span></a>
-          <a href="01-gens/anim-4-phone-spin/_anim-4_SEAMLESS-LOOP_4K-4x-upscaled.webm" download class="secondary">⬇ 4K WebM <span class="size">2.2 MB</span></a>
-          <a href="01-gens/anim-4-phone-spin/_anim-4_SEAMLESS-LOOP.mp4" download class="secondary">⬇ Original MP4 <span class="size">1.8 MB</span></a>
+        <p class="notes">Page: <i>Built to move with you. Always ready, always reliable.</i></p>
+        <div class="download-row" id="anim4-downloads">
+          <button id="anim4-bake-mp4" type="button" style="display:inline-flex;align-items:center;gap:5px;padding:7px 13px;background:#1cb4c0;color:#fff;border:none;border-radius:6px;font-size:11.5px;font-weight:600;cursor:pointer;letter-spacing:.02em;">⬇ Download MP4 at current speed</button>
+          <button id="anim4-bake-webm" type="button" style="display:inline-flex;align-items:center;gap:5px;padding:7px 13px;background:#fff;color:#0e7c84;border:1px solid #1cb4c0;border-radius:6px;font-size:11.5px;font-weight:600;cursor:pointer;letter-spacing:.02em;">⬇ Download WebM at current speed</button>
+          <span id="anim4-bake-status" style="font-size:11px;color:#6b7280;align-self:center;"></span>
         </div>
-        <div class="extra"><b>NEW bridge clip (loops back to spin start):</b> <a href="01-gens/anim-4-phone-spin/anim-4_bridge-to-spin-start_v2.mp4">anim-4_bridge-to-spin-start_v2.mp4</a> · Premiere bundle: <a href="01-gens/anim-4-phone-spin/_premiere-bundle/spin-in-order/">spin-in-order/</a> · <a href="01-gens/anim-4-phone-spin/_premiere-bundle/hand-attempts-chronological/">hand-attempts/</a> · <a href="anim-4-spin-preview.html">5-clip viewer</a></div>
-      </div>
-      <div class="card-foot">
-        <a href="approval-review.html?v=2026-05-25-1300-originals">Show all keyframes + clips in reviewer →</a>
       </div>
     </article>
 
@@ -247,18 +213,13 @@
       <div class="card-head">
         <span class="num">ANIM 5</span>
         <h2>Box open and close</h2>
-        <span class="chip done">🟢 Open + close loop stitched</span>
+        <span class="chip done">🟢 Final</span>
       </div>
       <div class="card-asset">
         <video src="01-gens/shot-01-box-lid-loop/_stitched-loop.mp4" autoplay loop muted playsinline controls></video>
       </div>
       <div class="card-body">
-        <p class="notes"><b>Stage:</b> Full open + close loop stitched (01a opening + 01b closing concatenated → <code>_stitched-loop.mp4</code>). Plays as infinite loop above. Box still reads as black-walled in current gens — we now know it's actually white. Revive + re-gen against white-box ref only on explicit request.</p>
-        <div class="next-label">→ Next step</div>
-        <span class="ask">anim 5 — revive and re-gen against the white-box reference</span>
-      </div>
-      <div class="card-foot">
-        <a href="approval-review.html?v=2026-05-25-1300-originals">Show all variants in reviewer →</a>
+        <p class="notes">Light-box lid opening and closing on a diamond necklace inside.</p>
       </div>
     </article>
 
@@ -267,19 +228,13 @@
       <div class="card-head">
         <span class="num">ANIM 6</span>
         <h2>LED flash patterns (browser)</h2>
-        <span class="chip ready">🟡 Ready to lock</span>
+        <span class="chip done">🟢 Final</span>
       </div>
       <div class="card-asset">
         <iframe src="anim-6-led-flicker.html"></iframe>
       </div>
       <div class="card-body">
-        <p class="notes"><b>Stage:</b> Non-AI browser animation. Live preview above — try different patterns + speed in the embedded iframe. Hit <b>Download MP4</b> inside it (or open in its own tab) to export the final.</p>
-        <div class="next-label">→ Next step</div>
-        <span class="ask">anim 6 — pattern + speed locked (which one?)</span>
-        <div class="extra">Open in its own tab → <a href="anim-6-led-flicker.html">anim-6-led-flicker.html</a></div>
-      </div>
-      <div class="card-foot">
-        <a href="approval-review.html?v=2026-05-25-1300-originals">Show source files in reviewer →</a>
+        <p class="notes">Pick a mode and speed, then export at 1080×1080.</p>
       </div>
     </article>
 
@@ -438,29 +393,164 @@
     else if (e.key === 'g' || e.key === 'G') { e.preventDefault(); compareBtn.click(); }
   });
 
-  // ===== Anim 4 — playback speed control =====
+  // ===== Anim 4 — playback speed control with auto source swap for slow-mo =====
   (function(){
     const v = document.getElementById('anim4-full');
     const r = document.getElementById('anim4-speed');
     const lbl = document.getElementById('anim4-speed-val');
     const eff = document.getElementById('anim4-eff-val');
     if (!v || !r) return;
-    const baseDur = 6.46;
-    function apply(rate){
-      v.playbackRate = rate;
-      lbl.textContent = rate.toFixed(2) + '×';
-      const effDur = baseDur / rate;
+
+    // Two sources:
+    //   • Default high-res 4K (6.46s, fast — 4× the original temporal speed)
+    //   • Original lower-res (25.46s, 4× more frames → smoother slow-mo when speed < 1×)
+    const SRC_4K   = '01-gens/anim-4-phone-spin/_anim-4_SEAMLESS-LOOP_4K-4x-upscaled.mp4';
+    const SRC_ORIG = '01-gens/anim-4-phone-spin/_anim-4_SEAMLESS-LOOP.mp4';
+    const DUR_4K   = 6.46;
+    const DUR_ORIG = 25.46;
+
+    function pickSource(uiRate){
+      // UI rate is what user picked. Compute effective duration. If user wants < 1× (slower than the 4K base),
+      // switch to the original lower-res 25.46s clip — it has 4× more frames so playback stays smooth even at <0.25×.
+      if (uiRate < 1.0) {
+        // Effective duration the user wants = DUR_4K / uiRate
+        const targetDur = DUR_4K / uiRate;
+        return { src: SRC_ORIG, baseDur: DUR_ORIG, actualRate: DUR_ORIG / targetDur };
+      }
+      return { src: SRC_4K, baseDur: DUR_4K, actualRate: uiRate };
+    }
+
+    const badge = document.getElementById('anim4-res-badge');
+    function apply(uiRate){
+      const pick = pickSource(uiRate);
+      const isHi = pick.src === SRC_4K;
+      if (!v.currentSrc.endsWith(pick.src.split('/').pop())) {
+        v.src = pick.src;
+        v.load();
+        v.play().catch(()=>{});
+      }
+      v.playbackRate = pick.actualRate;
+      lbl.textContent = uiRate.toFixed(2) + '×';
+      const effDur = DUR_4K / uiRate;
       eff.textContent = '≈ ' + effDur.toFixed(1) + 's';
+      if (badge) {
+        badge.textContent = isHi ? '4K' : 'SD smooth';
+        badge.style.background = isHi ? '#1cb4c0' : '#f59e0b';
+      }
     }
     r.addEventListener('input', () => apply(parseFloat(r.value)));
-    document.querySelectorAll('.anim4-preset').forEach(b => {
-      b.addEventListener('click', () => {
-        const sp = parseFloat(b.dataset.speed);
-        r.value = sp;
-        apply(sp);
-      });
-    });
     apply(1.0);
+
+    // ===== Bake at current speed (WebCodecs) =====
+    const bakeStatus = document.getElementById('anim4-bake-status');
+    const bakeMp4Btn = document.getElementById('anim4-bake-mp4');
+    const bakeWebmBtn = document.getElementById('anim4-bake-webm');
+
+    async function pickAvcCodec(W, H, FPS){
+      for (const codec of ['avc1.640028','avc1.4d0028','avc1.42E028','avc1.42E01F']){
+        try { const r = await VideoEncoder.isConfigSupported({codec,width:W,height:H,bitrate:12_000_000,framerate:FPS}); if (r.supported) return codec; } catch(e){}
+      }
+      return null;
+    }
+    async function pickVp9Codec(W, H, FPS){
+      for (const codec of ['vp09.00.51.08','vp09.00.50.08','vp09.00.40.08','vp09.00.31.08','vp09.00.20.08','vp09.00.10.08']){
+        try { const r = await VideoEncoder.isConfigSupported({codec,width:W,height:H,bitrate:6_000_000,framerate:FPS}); if (r.supported) return codec; } catch(e){}
+      }
+      return null;
+    }
+
+    async function bakeAtCurrentSpeed(format){
+      const btns = [bakeMp4Btn, bakeWebmBtn];
+      btns.forEach(b => b.disabled = true);
+      bakeStatus.textContent = 'Preparing…';
+      try {
+        const uiRate = parseFloat(r.value);
+        const pick = pickSource(uiRate);
+        const isHi = pick.src === SRC_4K;
+        const srcDur = isHi ? DUR_4K : DUR_ORIG;
+        // Output duration the viewer sees = sourceDuration / actualRate
+        const outDur = srcDur / pick.actualRate;
+        const FPS = 24;
+        const totalFrames = Math.ceil(outDur * FPS);
+
+        // Load source into an isolated video element so we don't mess with the live player
+        const srcEl = document.createElement('video');
+        srcEl.src = pick.src;
+        srcEl.muted = true;
+        srcEl.preload = 'auto';
+        await new Promise((res, rej) => {
+          srcEl.addEventListener('loadeddata', res, { once: true });
+          srcEl.addEventListener('error', () => rej(new Error('source load failed')), { once: true });
+        });
+        const W = srcEl.videoWidth, H = srcEl.videoHeight;
+
+        const off = document.createElement('canvas');
+        off.width = W; off.height = H;
+        const offCtx = off.getContext('2d');
+
+        let muxer, encoder, codec, mime, ext;
+        if (format === 'mp4'){
+          codec = await pickAvcCodec(W, H, FPS);
+          if (!codec) throw new Error('No H.264 codec supported (try Chrome/Edge).');
+          const m = await import('https://cdn.jsdelivr.net/npm/mp4-muxer@5.2.1/+esm');
+          muxer = new m.Muxer({ target: new m.ArrayBufferTarget(), video: { codec: 'avc', width: W, height: H, frameRate: FPS }, fastStart: 'in-memory' });
+          mime = 'video/mp4'; ext = 'mp4';
+          encoder = new VideoEncoder({ output: (c, meta) => muxer.addVideoChunk(c, meta), error: e => { console.error(e); bakeStatus.textContent = 'Encoder error: ' + e.message; } });
+          encoder.configure({ codec, width: W, height: H, bitrate: 12_000_000, framerate: FPS });
+        } else {
+          codec = await pickVp9Codec(W, H, FPS);
+          if (!codec) throw new Error('No VP9 codec supported (try Chrome/Edge).');
+          const m = await import('https://cdn.jsdelivr.net/npm/webm-muxer@5.0.3/+esm');
+          muxer = new m.Muxer({ target: new m.ArrayBufferTarget(), video: { codec: 'V_VP9', width: W, height: H, frameRate: FPS } });
+          mime = 'video/webm'; ext = 'webm';
+          encoder = new VideoEncoder({ output: (c, meta) => muxer.addVideoChunk(c, meta), error: e => { console.error(e); bakeStatus.textContent = 'Encoder error: ' + e.message; } });
+          encoder.configure({ codec, width: W, height: H, bitrate: 6_000_000, framerate: FPS });
+        }
+
+        bakeStatus.textContent = `Rendering ${totalFrames} frames at ${uiRate.toFixed(2)}×…`;
+        for (let i = 0; i <= totalFrames; i++){
+          const tOut = i / FPS;
+          // Source time = output time scaled by actual playback rate
+          let tSrc = tOut * pick.actualRate;
+          if (tSrc > srcDur - 0.001) tSrc = srcDur - 0.001;
+          await new Promise(res => {
+            let to = null;
+            const onSeeked = () => { srcEl.removeEventListener('seeked', onSeeked); if (to) clearTimeout(to); res(); };
+            srcEl.addEventListener('seeked', onSeeked);
+            srcEl.currentTime = tSrc;
+            to = setTimeout(() => { srcEl.removeEventListener('seeked', onSeeked); res(); }, 1500);
+          });
+          await new Promise(res => setTimeout(res, 0));
+          offCtx.drawImage(srcEl, 0, 0, W, H);
+          const frame = new VideoFrame(off, { timestamp: Math.round(i * 1e6 / FPS), duration: Math.round(1e6 / FPS) });
+          encoder.encode(frame, { keyFrame: (i % 30) === 0 });
+          frame.close();
+          if (i % 6 === 0){
+            bakeStatus.textContent = `Rendering ${i}/${totalFrames}  (${(100*i/totalFrames).toFixed(0)}%) · ${isHi ? '4K' : 'SD'} @ ${uiRate.toFixed(2)}×`;
+            await new Promise(res => setTimeout(res, 0));
+          }
+        }
+
+        bakeStatus.textContent = 'Flushing encoder…';
+        await encoder.flush();
+        muxer.finalize();
+        const blob = new Blob([muxer.target.buffer], { type: mime });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        const stamp = new Date().toISOString().slice(0,16).replace(/[-:T]/g,'');
+        link.download = `anim-4_spin_${uiRate.toFixed(2)}x_${isHi ? '4K' : 'SD'}_${stamp}.${ext}`;
+        link.href = url; link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 60_000);
+        bakeStatus.textContent = `✓ ${ext.toUpperCase()} downloaded (${(blob.size/1024/1024).toFixed(2)} MB · ${totalFrames} frames · ${isHi ? '4K' : 'SD'})`;
+      } catch (e){
+        console.error(e);
+        bakeStatus.textContent = 'Failed: ' + e.message;
+      } finally {
+        btns.forEach(b => b.disabled = false);
+      }
+    }
+    bakeMp4Btn.addEventListener('click', () => bakeAtCurrentSpeed('mp4'));
+    bakeWebmBtn.addEventListener('click', () => bakeAtCurrentSpeed('webm'));
   })();
 
   // Collect each card's assets + wire click-to-fullscreen

@@ -8,7 +8,10 @@
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; background: #fff; color: #1f2937; font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; }
   .wrap { max-width: 920px; margin: 0 auto; padding: 36px 24px 60px; }
-  header { padding-bottom: 16px; border-bottom: 1px solid #e5e7eb; margin-bottom: 24px; }
+  header { padding: 0; border-bottom: none; margin-bottom: 12px; display: flex; align-items: center; justify-content: flex-end; gap: 0; }
+  header .titleblock { display: none; }
+  header .export-row { margin: 0; flex-shrink: 0; max-width: 320px; padding: 10px 14px; }
+  .wrap { padding-top: 16px; }
   .crumb { display: inline-block; font-size: 11px; color: #1cb4c0; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; margin-bottom: 6px; }
   h1 { font-size: 20px; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.01em; }
   p.sub { margin: 0; color: #6b7280; font-size: 13px; line-height: 1.55; max-width: 640px; }
@@ -48,12 +51,6 @@
 
 <div class="wrap">
 
-  <header>
-    <span class="crumb">GemIQ · Animation 6</span>
-    <h1>LED flash patterns</h1>
-    <p class="sub">Phone-light programmable flashing. Pick a single state (locks it on), or play a flicker pattern. Speed slider adjusts pattern playback. Hit Download MP4 to export the current setup at 1080×1080.</p>
-  </header>
-
   <div class="stage" id="stage">
     <img class="layer" id="layer-off" src="00-source-stills/Frame 41233604.png" alt="Off (no LEDs lit)" crossorigin="anonymous">
     <img class="layer" id="layer-a" src="00-source-stills/Frame 41233603.png" alt="Pattern A" crossorigin="anonymous">
@@ -61,28 +58,13 @@
     <img class="layer active" id="layer-all-on" src="00-source-stills/Frame_all-on_composite.png" alt="All 12 LEDs on" crossorigin="anonymous">
   </div>
 
-  <div class="now-showing">Currently showing: <span id="nowShowing">all-on</span></div>
-
   <div class="section">
-    <div class="label">Single state (click to lock)</div>
+    <div class="label">Mode (click to lock or play)</div>
     <div class="row state" id="stateRow">
+      <button data-state="all-on">⚪ Constant mode</button>
+      <button data-pattern="pulse" class="mode-pattern active">✨ Sparkle mode</button>
+      <button data-pattern="glow" class="mode-pattern">🌟 Glow mode</button>
       <button data-state="off">⚫ Off</button>
-      <button data-state="a">◐ Pattern A</button>
-      <button data-state="b">◑ Pattern B</button>
-      <button data-state="all-on" class="active">⚪ Constant mode (all on)</button>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="label">Flicker patterns (cycling)</div>
-    <div class="row" id="patternRow">
-      <button data-pattern="showcase">Showcase</button>
-      <button data-pattern="rapid">Rapid</button>
-      <button data-pattern="steady">Steady rotate</button>
-      <button data-pattern="random">Random</button>
-      <button data-pattern="strobe">Strobe (on/off)</button>
-      <button data-pattern="pulse">✨ Sparkle mode (A↔B)</button>
-      <button data-pattern="glow">🌟 Glow mode (all-on pulse)</button>
     </div>
   </div>
 
@@ -92,10 +74,27 @@
     <span class="value" id="speedLabel">1.00×</span>
   </div>
 
-  <div class="export-row">
+  <div class="now-showing">Currently showing: <span id="nowShowing">all-on</span></div>
+
+  <div class="export-row" style="margin-top:16px;">
     <button id="exportBtn">⬇ Download MP4</button>
-    <span class="status" id="exportStatus">Renders current state or pattern at 1080×1080 @ 30fps (2 loops for clean cut). WebCodecs required (Chrome / Brave / Edge).</span>
+    <span class="status" id="exportStatusInline" style="font-size:11px;color:#475569;flex:1;">Renders current state or pattern at 1080×1080 @ 30fps (2 loops for clean cut). WebCodecs required (Chrome / Brave / Edge).</span>
   </div>
+
+  <div class="section">
+    <div class="label">More patterns (cycling)</div>
+    <div class="row" id="patternRow">
+      <button data-pattern="showcase">Showcase</button>
+      <button data-pattern="rapid">Rapid</button>
+      <button data-pattern="steady">Steady rotate</button>
+      <button data-pattern="random">Random</button>
+      <button data-pattern="strobe">Strobe (on/off)</button>
+      <button data-state="a">◐ Pattern A</button>
+      <button data-state="b">◑ Pattern B</button>
+    </div>
+  </div>
+
+  <span id="exportStatus" style="display:none;"></span>
 
   <p class="legend">
     States: <code>off</code> = Frame 41233604 · <code>a</code> = Frame 41233603 · <code>b</code> = Frame 41233605 · <code>all-on</code> = composite of A+B (max-blended)
@@ -209,28 +208,39 @@
     currentTimer = setTimeout(nextStep, dur / speedMultiplier);
   }
 
+  function clearAllActive() {
+    document.querySelectorAll('#stateRow button, #patternRow button').forEach(b => b.classList.remove('active'));
+  }
+
   function setSingleState(state) {
     clearTimer();
     currentMode = { kind: 'single', value: state };
     document.getElementById('stage').classList.remove('glow-mode');
     showState(state);
-    document.querySelectorAll('#stateRow button').forEach(b => b.classList.toggle('active', b.dataset.state === state));
-    document.querySelectorAll('#patternRow button').forEach(b => b.classList.remove('active'));
+    clearAllActive();
+    document.querySelectorAll('#stateRow button, #patternRow button').forEach(b => {
+      if (b.dataset.state === state) b.classList.add('active');
+    });
   }
 
   function setPattern(name) {
     clearTimer();
     currentMode = { kind: 'pattern', value: name };
     stepIndex = 0;
-    // Glow mode uses CSS fade transitions for the breathing effect
     document.getElementById('stage').classList.toggle('glow-mode', name === 'glow');
     nextStep();
-    document.querySelectorAll('#patternRow button').forEach(b => b.classList.toggle('active', b.dataset.pattern === name));
-    document.querySelectorAll('#stateRow button').forEach(b => b.classList.remove('active'));
+    clearAllActive();
+    document.querySelectorAll('#stateRow button, #patternRow button').forEach(b => {
+      if (b.dataset.pattern === name) b.classList.add('active');
+    });
   }
 
-  document.querySelectorAll('#stateRow button').forEach(b => b.addEventListener('click', () => setSingleState(b.dataset.state)));
-  document.querySelectorAll('#patternRow button').forEach(b => b.addEventListener('click', () => setPattern(b.dataset.pattern)));
+  document.querySelectorAll('#stateRow button, #patternRow button').forEach(b => {
+    b.addEventListener('click', () => {
+      if (b.dataset.state) setSingleState(b.dataset.state);
+      else if (b.dataset.pattern) setPattern(b.dataset.pattern);
+    });
+  });
 
   document.getElementById('speed').addEventListener('input', (e) => {
     speedMultiplier = parseFloat(e.target.value);
@@ -422,8 +432,8 @@
 
   exportBtn.addEventListener('click', exportMp4);
 
-  // Initial state
-  showState('all-on');
+  // Initial state — default to Sparkle mode
+  setPattern('pulse');
 </script>
 
 </body>

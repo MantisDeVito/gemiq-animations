@@ -7,14 +7,16 @@
   :root { --teal:#1cb4c0; --teal-soft:rgba(28,180,192,0.32); --bg:#0a0a0c; --panel:#16161a; --line:#2a2a2e; --text:#e4e4e7; --dim:#a1a1aa; }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--text);font:13px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
-  .wrap{display:grid;grid-template-columns:1fr 320px;min-height:100vh;gap:0;}
+  .wrap{display:flex;flex-direction:column;min-height:100vh;}
   .stage{display:flex;align-items:center;justify-content:center;padding:20px;background:#000;position:relative;}
-  .canvas-frame{position:relative;width:100%;max-width:1100px;aspect-ratio:1284/716;background:#000;}
+  .canvas-frame{position:relative;width:100%;max-width:1400px;aspect-ratio:1284/716;background:#000;}
   canvas{position:absolute;inset:0;width:100%;height:100%;}
   video.hidden{position:absolute;left:-9999px;width:1px;height:1px;opacity:0;}
-  .controls{padding:18px;background:var(--panel);border-left:1px solid var(--line);overflow-y:auto;}
-  h1{margin:0 0 4px;font-size:13px;font-weight:700;color:var(--teal);letter-spacing:.06em;text-transform:uppercase;}
-  .sub{font-size:11px;color:var(--dim);margin-bottom:18px;}
+  .controls{padding:24px 28px 40px;background:var(--panel);border-top:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr;gap:0 36px;max-width:1400px;width:100%;margin:0 auto;}
+  .controls .full{grid-column:1 / -1;}
+  @media (max-width:780px){.controls{grid-template-columns:1fr;}}
+  h1{margin:0 0 4px;font-size:13px;font-weight:700;color:var(--teal);letter-spacing:.06em;text-transform:uppercase;grid-column:1 / -1;}
+  .sub{font-size:11px;color:var(--dim);margin-bottom:18px;grid-column:1 / -1;}
   .row{margin-bottom:14px;}
   .row label{display:block;font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
   .row .val{float:right;color:var(--teal);font-variant-numeric:tabular-nums;font-weight:600;}
@@ -26,7 +28,8 @@
   .status{margin-top:12px;padding:10px;background:#000;border:1px solid var(--line);border-radius:4px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;color:var(--dim);min-height:36px;white-space:pre-wrap;}
   .status.ok{color:#86efac;border-color:#166534;}
   .status.err{color:#fca5a5;border-color:#7f1d1d;}
-  .group{margin:24px 0 10px;font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--line);padding-bottom:6px;}
+  .group{margin:24px 0 10px;font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--line);padding-bottom:6px;grid-column:1 / -1;}
+  .btn,.status{grid-column:1 / -1;}
   .toggle{display:flex;gap:8px;}
   .toggle button{flex:1;padding:6px;background:#222;border:1px solid var(--line);color:var(--text);cursor:pointer;font-size:11px;border-radius:3px;}
   .toggle button.active{background:var(--teal);color:#000;border-color:var(--teal);font-weight:700;}
@@ -48,7 +51,21 @@
 
   <div class="controls">
     <h1>Anim 2 — V7 composite</h1>
-    <div class="sub">Source: _seamless-loop-v2.mp4 · 1928×1076 (~1920×1080) · 6.08s · 24fps. NBP-matched pair + anti-bounce / anti-opacity prompt. Overlay: V7 travelling laser arc.</div>
+    <div class="sub">Pick a quick preset, or open the editor to fine-tune.</div>
+
+    <div class="group">Quick presets</div>
+    <div class="full" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+      <button class="btn-preset" data-preset="subtle" style="flex:1;min-width:120px;padding:14px 12px;background:#0e7c84;color:#fff;border:none;border-radius:6px;font-weight:700;font-size:12px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;">Subtle</button>
+      <button class="btn-preset active" data-preset="standard" style="flex:1;min-width:120px;padding:14px 12px;background:#1cb4c0;color:#000;border:none;border-radius:6px;font-weight:700;font-size:12px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;">Standard</button>
+      <button class="btn-preset" data-preset="bold" style="flex:1;min-width:120px;padding:14px 12px;background:#0e7c84;color:#fff;border:none;border-radius:6px;font-weight:700;font-size:12px;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;">Bold (3 beams)</button>
+    </div>
+
+    <div class="full" style="margin-bottom:14px;">
+      <button id="btnToggleEdit" style="width:100%;padding:10px;background:transparent;color:var(--teal);border:1px dashed var(--line);border-radius:6px;font-size:11.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;">▾ Edit advanced controls</button>
+    </div>
+
+    <div id="advancedControls" style="display:none;grid-column:1 / -1;display:none;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 36px;">
 
     <div class="group">Playback</div>
     <div class="toggle">
@@ -58,12 +75,12 @@
 
     <div class="group">Laser timing</div>
     <div class="row">
-      <label>Laser start <span class="val" id="vStart">1.00s</span></label>
-      <input type="range" id="iStart" min="0" max="5" step="0.05" value="1.0">
+      <label>Laser start <span class="val" id="vStart">1.76s</span></label>
+      <input type="range" id="iStart" min="0" max="5" step="0.005" value="1.755">
     </div>
     <div class="row">
-      <label>Laser duration <span class="val" id="vDur">1.80s</span></label>
-      <input type="range" id="iDur" min="0.6" max="3.5" step="0.05" value="1.8">
+      <label>Laser duration <span class="val" id="vDur">1.41s</span></label>
+      <input type="range" id="iDur" min="0.6" max="3.5" step="0.005" value="1.405">
     </div>
     <div class="row">
       <label>Monitor flash delay <span class="val" id="vFlash">+0.10s</span></label>
@@ -80,8 +97,8 @@
       <input type="range" id="iGlowS" min="0.2" max="2" step="0.05" value="1.0">
     </div>
     <div class="row">
-      <label>Beam head length <span class="val" id="vHead">250 px</span></label>
-      <input type="range" id="iHead" min="80" max="2000" step="10" value="250">
+      <label>Beam head length <span class="val" id="vHead">1200 px</span></label>
+      <input type="range" id="iHead" min="80" max="2000" step="10" value="1200">
     </div>
     <div class="row">
       <label>Number of beams <span class="val" id="vBeams">1</span></label>
@@ -94,16 +111,16 @@
 
     <div class="group">Opacity</div>
     <div class="row">
-      <label>Monitor flash opacity <span class="val" id="vMonOp">0.55</span></label>
-      <input type="range" id="iMonOp" min="0" max="1" step="0.02" value="0.55">
+      <label>Monitor flash opacity <span class="val" id="vMonOp">0.00</span></label>
+      <input type="range" id="iMonOp" min="0" max="1" step="0.02" value="0">
     </div>
     <div class="row">
-      <label>Laser glow opacity <span class="val" id="vGlowOp">1.00</span></label>
-      <input type="range" id="iGlowOp" min="0" max="1" step="0.02" value="1.0">
+      <label>Laser glow opacity <span class="val" id="vGlowOp">0.50</span></label>
+      <input type="range" id="iGlowOp" min="0" max="1" step="0.02" value="0.5">
     </div>
     <div class="row">
-      <label>Laser core opacity <span class="val" id="vCoreOp">1.00</span></label>
-      <input type="range" id="iCoreOp" min="0" max="1" step="0.02" value="1.0">
+      <label>Laser core opacity <span class="val" id="vCoreOp">0.75</span></label>
+      <input type="range" id="iCoreOp" min="0" max="1" step="0.02" value="0.75">
     </div>
     <div class="row">
       <label>Colour <span class="val" id="vColour">#1cb4c0</span></label>
@@ -131,6 +148,9 @@
       <button class="btn secondary" id="btnPresetDel" style="margin-top:0;flex:0 0 auto;padding:7px 12px;font-size:11px;">Delete</button>
     </div>
 
+      </div>
+    </div>
+
     <div class="group">Export</div>
     <div class="row">
       <label>Output resolution</label>
@@ -154,18 +174,18 @@ const video = document.getElementById('src');
 const statusEl = document.getElementById('status');
 
 const cfg = {
-  laserStart: 1.0,
-  laserDur:   1.8,
+  laserStart: 1.755,
+  laserDur:   1.405,
   flashDelay: 0.10,
   stroke: 5,
   glow: 1.0,
-  head: 250,
+  head: 1200,
   beams: 1,
   stagger: 0.15,
   colour: '#1cb4c0',
-  monOpacity:  0.55,
-  glowOpacity: 1.0,
-  coreOpacity: 1.0,
+  monOpacity:  0,
+  glowOpacity: 0.5,
+  coreOpacity: 0.75,
   outW: 1928, outH: 1076,
   loopLen: 6.083,
   fps: 24,
@@ -247,13 +267,16 @@ let cachedPathLen = 795;
 
 function drawComposite(tSec){
   const W = canvas.width, H = canvas.height;
-  ctx.fillStyle = '#fff';
-  ctx.fillRect(0,0,W,H);
-
-  // 1. video frame
-  if (video.readyState >= 2 && !video.error) {
-    try { ctx.drawImage(video, 0, 0, W, H); } catch(e) {}
-  }
+  // Skip the entire redraw if the video element doesn't have a current frame yet
+  // (happens momentarily on loop restart). Leaving the canvas alone keeps the
+  // previous good frame on screen instead of flashing white.
+  if (video.readyState < 2 || video.error) return;
+  let drew = false;
+  try {
+    ctx.drawImage(video, 0, 0, W, H);
+    drew = true;
+  } catch(e) {}
+  if (!drew) return;
 
   // 2. Laser arcs — draw N beams, each staggered by cfg.stagger seconds
   const n = Math.max(1, Math.floor(cfg.beams));
@@ -406,11 +429,14 @@ function drawMonitorFlash(tSec){
   ctx.restore();
 }
 
-// Live loop
+// Live loop — prefer requestVideoFrameCallback (only fires when a new frame is ready)
+// so we don't redraw during the brief "no frame" state on loop restart. Falls back to RAF.
 let rafId = null;
+const useRVFC = typeof video.requestVideoFrameCallback === 'function';
 function tick(){
   drawComposite(video.currentTime);
-  rafId = requestAnimationFrame(tick);
+  if (useRVFC) rafId = video.requestVideoFrameCallback(tick);
+  else rafId = requestAnimationFrame(tick);
 }
 video.addEventListener('loadedmetadata', () => {
   cfg.loopLen = video.duration;
@@ -487,6 +513,80 @@ document.getElementById('btnPresetDel').addEventListener('click', () => {
 });
 refreshPresetSelect();
 
+// Built-in quick presets
+const BUILTIN_PRESETS = {
+  subtle: {
+    laserStart: 1.855, laserDur: 1.8, flashDelay: 0.1,
+    stroke: 3, glow: 0.8, head: 200, beams: 1, stagger: 0.15,
+    colour: '#a78bfa',
+    monOpacity: 0.35, glowOpacity: 0.7, coreOpacity: 0.85
+  },
+  standard: {
+    laserStart: 1.755, laserDur: 1.405, flashDelay: 0.1,
+    stroke: 5, glow: 1.0, head: 1200, beams: 1, stagger: 0.15,
+    colour: '#1cb4c0',
+    monOpacity: 0, glowOpacity: 0.5, coreOpacity: 0.75
+  },
+  bold: {
+    laserStart: 1.78, laserDur: 1.29, flashDelay: 0.1,
+    stroke: 7, glow: 1.3, head: 380, beams: 3, stagger: 0.36,
+    colour: '#10b981',
+    monOpacity: 0, glowOpacity: 0.72, coreOpacity: 1.0
+  }
+};
+function applyBuiltin(name) {
+  const p = BUILTIN_PRESETS[name];
+  if (!p) return;
+  PRESET_FIELDS.forEach(f => { if (p[f] !== undefined) cfg[f] = p[f]; });
+  // sync UI
+  document.getElementById('iStart').value = cfg.laserStart;
+  document.getElementById('iDur').value = cfg.laserDur;
+  document.getElementById('iFlash').value = cfg.flashDelay;
+  document.getElementById('iStroke').value = cfg.stroke;
+  document.getElementById('iGlowS').value = cfg.glow;
+  document.getElementById('iHead').value = cfg.head;
+  document.getElementById('iBeams').value = cfg.beams;
+  document.getElementById('iStagger').value = cfg.stagger;
+  document.getElementById('iColour').value = cfg.colour;
+  document.getElementById('iMonOp').value = cfg.monOpacity;
+  document.getElementById('iGlowOp').value = cfg.glowOpacity;
+  document.getElementById('iCoreOp').value = cfg.coreOpacity;
+  document.getElementById('vStart').textContent = cfg.laserStart.toFixed(2)+'s';
+  document.getElementById('vDur').textContent = cfg.laserDur.toFixed(2)+'s';
+  document.getElementById('vFlash').textContent = (cfg.flashDelay>=0?'+':'') + cfg.flashDelay.toFixed(2)+'s';
+  document.getElementById('vStroke').textContent = cfg.stroke.toFixed(1);
+  document.getElementById('vGlow').textContent = cfg.glow.toFixed(2);
+  document.getElementById('vHead').textContent = cfg.head.toFixed(0)+' px';
+  document.getElementById('vBeams').textContent = cfg.beams;
+  document.getElementById('vStagger').textContent = cfg.stagger.toFixed(2)+'s';
+  document.getElementById('vColour').textContent = cfg.colour;
+  document.getElementById('vMonOp').textContent = cfg.monOpacity.toFixed(2);
+  document.getElementById('vGlowOp').textContent = cfg.glowOpacity.toFixed(2);
+  document.getElementById('vCoreOp').textContent = cfg.coreOpacity.toFixed(2);
+  document.querySelectorAll('.btn-preset').forEach(b => {
+    const active = b.dataset.preset === name;
+    b.classList.toggle('active', active);
+    b.style.background = active ? '#1cb4c0' : '#0e7c84';
+    b.style.color = active ? '#000' : '#fff';
+  });
+}
+document.querySelectorAll('.btn-preset').forEach(b => {
+  b.addEventListener('click', () => applyBuiltin(b.dataset.preset));
+});
+
+// Edit toggle
+document.getElementById('btnToggleEdit').addEventListener('click', () => {
+  const adv = document.getElementById('advancedControls');
+  const open = adv.style.display !== 'none' && adv.style.display !== '';
+  if (open) {
+    adv.style.display = 'none';
+    document.getElementById('btnToggleEdit').textContent = '▾ Edit advanced controls';
+  } else {
+    adv.style.display = 'block';
+    document.getElementById('btnToggleEdit').textContent = '▴ Hide advanced controls';
+  }
+});
+
 // Fullscreen
 document.getElementById('btnFullscreen').addEventListener('click', () => {
   const el = document.querySelector('.canvas-frame');
@@ -546,7 +646,7 @@ document.getElementById('btnExport').addEventListener('click', async () => {
     canvas.height = H;
 
     // Pause live loop
-    cancelAnimationFrame(rafId); rafId = null;
+    if (useRVFC && rafId != null) { try { video.cancelVideoFrameCallback(rafId); } catch(e){} } else { cancelAnimationFrame(rafId); } rafId = null;
     video.pause();
 
     const codec = await pickAvcCodec(W, H, FPS);
@@ -647,7 +747,7 @@ document.getElementById('btnExportWebM').addEventListener('click', async () => {
 
     const prevW = canvas.width, prevH = canvas.height;
     canvas.width = W; canvas.height = H;
-    cancelAnimationFrame(rafId); rafId = null;
+    if (useRVFC && rafId != null) { try { video.cancelVideoFrameCallback(rafId); } catch(e){} } else { cancelAnimationFrame(rafId); } rafId = null;
     video.pause();
 
     const codec = await pickVp9Codec(W, H, FPS);
