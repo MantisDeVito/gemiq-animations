@@ -453,6 +453,30 @@ video.addEventListener('loadedmetadata', () => {
 });
 video.addEventListener('error', e => setStatus('Video load error. Check the source path.', 'err'));
 
+// iOS Safari bug: the `loop` attribute is silently dropped after an autoplay
+// (and especially inside an iframe). Result: video plays once, `ended` fires,
+// playback stops on the last frame — i.e. "hands stay on screen". Manually
+// restart on `ended` to enforce looping cross-device.
+video.addEventListener('ended', () => {
+  try { video.currentTime = 0; } catch(e) {}
+  const p = video.play();
+  if (p && p.catch) p.catch(()=>{});
+});
+
+// iOS Safari also pauses out-of-viewport videos (and the Anim 2 iframe is below
+// the fold on mobile). Re-trigger playback whenever the video scrolls into view.
+if ('IntersectionObserver' in window) {
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && video.paused && !video.ended) {
+        const p = video.play();
+        if (p && p.catch) p.catch(()=>{});
+      }
+    });
+  }, { threshold: 0.1 });
+  io.observe(video);
+}
+
 // Controls
 function bind(id, prop, fmt){
   const i = document.getElementById(id);
