@@ -429,14 +429,15 @@ function drawMonitorFlash(tSec){
   ctx.restore();
 }
 
-// Live loop — prefer requestVideoFrameCallback (only fires when a new frame is ready)
-// so we don't redraw during the brief "no frame" state on loop restart. Falls back to RAF.
+// Live loop — always use requestAnimationFrame for cross-device reliability.
+// Mobile Safari's requestVideoFrameCallback stops firing partway through some loops,
+// which froze the laser overlay on iOS. RAF fires consistently at ~60Hz everywhere;
+// the readyState guard in drawComposite prevents the white flash on loop restart.
 let rafId = null;
-const useRVFC = typeof video.requestVideoFrameCallback === 'function';
+const useRVFC = false; // kept as a flag so the cancel logic below still works
 function tick(){
   drawComposite(video.currentTime);
-  if (useRVFC) rafId = video.requestVideoFrameCallback(tick);
-  else rafId = requestAnimationFrame(tick);
+  rafId = requestAnimationFrame(tick);
 }
 video.addEventListener('loadedmetadata', () => {
   cfg.loopLen = video.duration;
