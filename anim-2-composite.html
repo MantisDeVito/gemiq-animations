@@ -267,10 +267,10 @@ let cachedPathLen = 795;
 
 function drawComposite(tSec){
   const W = canvas.width, H = canvas.height;
-  // Skip the entire redraw if the video element doesn't have a current frame yet
-  // (happens momentarily on loop restart). Leaving the canvas alone keeps the
-  // previous good frame on screen instead of flashing white.
-  if (video.readyState < 2 || video.error) return;
+  // Try to draw the current video frame. If drawImage throws (very early in
+  // load, before metadata), bail and leave the canvas as-is — no white pre-fill,
+  // so loop restart never flashes white. Don't gate on readyState because on
+  // mobile Safari that fluctuates mid-loop and freezes the canvas.
   let drew = false;
   try {
     ctx.drawImage(video, 0, 0, W, H);
@@ -441,9 +441,14 @@ function tick(){
 }
 video.addEventListener('loadedmetadata', () => {
   cfg.loopLen = video.duration;
-  setStatus('Loaded. Duration ' + cfg.loopLen.toFixed(2) + 's @ ' + video.videoWidth + 'x' + video.videoHeight);
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
+  // Cap canvas internal resolution to 1280 wide on small screens to ease GPU pressure.
+  // CSS still scales the canvas to fit the container, so visual quality stays fine.
+  const isMobile = matchMedia('(max-width: 900px)').matches || matchMedia('(pointer: coarse)').matches;
+  const maxW = isMobile ? 1280 : video.videoWidth;
+  const scale = Math.min(1, maxW / video.videoWidth);
+  canvas.width = Math.round(video.videoWidth * scale);
+  canvas.height = Math.round(video.videoHeight * scale);
+  setStatus('Loaded. Duration ' + cfg.loopLen.toFixed(2) + 's @ ' + video.videoWidth + 'x' + video.videoHeight + (scale < 1 ? ' (canvas scaled to ' + canvas.width + 'x' + canvas.height + ' for mobile)' : ''));
   video.loop = true;
   video.play().then(()=>tick()).catch(e => setStatus('Click Play to start: ' + e.message, 'err'));
 });
