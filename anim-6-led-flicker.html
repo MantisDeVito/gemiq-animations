@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GemIQ — Animation 6 — LED flash patterns</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #fff; color: #1f2937; font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 36px 24px 60px; }
+  header { padding-bottom: 16px; border-bottom: 1px solid #e5e7eb; margin-bottom: 24px; }
+  .crumb { display: inline-block; font-size: 11px; color: #1cb4c0; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; margin-bottom: 6px; }
+  h1 { font-size: 20px; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.01em; }
+  p.sub { margin: 0; color: #6b7280; font-size: 13px; line-height: 1.55; max-width: 640px; }
+
+  .stage { width: min(480px, 100%); aspect-ratio: 1/1; margin: 0 auto; position: relative; background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 10px 36px rgba(0,0,0,0.08); border: 1px solid #f1f5f9; }
+  .stage .layer { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: 0; transition: none; }
+  .stage .layer.active { opacity: 1; }
+  .stage.glow-mode .layer { transition: opacity 400ms ease-in-out; }
+
+  .now-showing { margin-top: 12px; text-align: center; font-size: 11px; color: #9ca3af; letter-spacing: 0.08em; text-transform: uppercase; }
+  .now-showing span { color: #1cb4c0; font-weight: 700; }
+
+  .section { margin: 22px auto 0; max-width: 540px; }
+  .section .label { font-size: 10.5px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; margin-bottom: 8px; text-align: center; }
+  .row { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; }
+  .row button { padding: 8px 13px; border-radius: 8px; border: 1px solid #d1d5db; background: #fff; cursor: pointer; font-size: 12px; color: #374151; font-weight: 500; transition: all 0.15s; }
+  .row button:hover { background: #f9fafb; }
+  .row button.active { background: #1cb4c0; color: #fff; border-color: #1cb4c0; }
+  .row.state button.active { background: #f59e0b; border-color: #f59e0b; color: #fff; }
+
+  .controls { margin: 16px auto 0; padding: 14px 18px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; max-width: 540px; }
+  .controls label { font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; white-space: nowrap; }
+  .controls input[type=range] { width: 100%; accent-color: #1cb4c0; }
+  .controls .value { font-size: 13px; font-variant-numeric: tabular-nums; color: #1f2937; min-width: 56px; text-align: right; font-weight: 600; }
+
+  .export-row { margin: 16px auto 0; padding: 14px 18px; background: #f0fdfa; border: 1px solid rgba(28,180,192,0.4); border-radius: 10px; display: flex; gap: 10px; align-items: center; max-width: 540px; flex-wrap: wrap; }
+  .export-row button { padding: 9px 16px; border-radius: 8px; border: 1px solid #1cb4c0; background: #1cb4c0; color: #fff; cursor: pointer; font-size: 12.5px; font-weight: 600; }
+  .export-row button:disabled { background: #94a3b8; border-color: #94a3b8; cursor: not-allowed; }
+  .export-row .status { font-size: 11.5px; color: #475569; flex: 1; min-width: 180px; }
+  .export-row .status.success { color: #0f766e; font-weight: 600; }
+
+  .legend { margin-top: 22px; text-align: center; font-size: 11px; color: #9ca3af; max-width: 540px; margin-left: auto; margin-right: auto; }
+  .legend code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; color: #6b7280; font-size: 10.5px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <span class="crumb">GemIQ · Animation 6</span>
+    <h1>LED flash patterns</h1>
+    <p class="sub">Phone-light programmable flashing. Pick a single state (locks it on), or play a flicker pattern. Speed slider adjusts pattern playback. Hit Download MP4 to export the current setup at 1080×1080.</p>
+  </header>
+
+  <div class="stage" id="stage">
+    <img class="layer" id="layer-off" src="00-source-stills/Frame 41233604.png" alt="Off (no LEDs lit)" crossorigin="anonymous">
+    <img class="layer" id="layer-a" src="00-source-stills/Frame 41233603.png" alt="Pattern A" crossorigin="anonymous">
+    <img class="layer" id="layer-b" src="00-source-stills/Frame 41233605.png" alt="Pattern B" crossorigin="anonymous">
+    <img class="layer active" id="layer-all-on" src="00-source-stills/Frame_all-on_composite.png" alt="All 12 LEDs on" crossorigin="anonymous">
+  </div>
+
+  <div class="now-showing">Currently showing: <span id="nowShowing">all-on</span></div>
+
+  <div class="section">
+    <div class="label">Single state (click to lock)</div>
+    <div class="row state" id="stateRow">
+      <button data-state="off">⚫ Off</button>
+      <button data-state="a">◐ Pattern A</button>
+      <button data-state="b">◑ Pattern B</button>
+      <button data-state="all-on" class="active">⚪ Constant mode (all on)</button>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="label">Flicker patterns (cycling)</div>
+    <div class="row" id="patternRow">
+      <button data-pattern="showcase">Showcase</button>
+      <button data-pattern="rapid">Rapid</button>
+      <button data-pattern="steady">Steady rotate</button>
+      <button data-pattern="random">Random</button>
+      <button data-pattern="strobe">Strobe (on/off)</button>
+      <button data-pattern="pulse">✨ Sparkle mode (A↔B)</button>
+      <button data-pattern="glow">🌟 Glow mode (all-on pulse)</button>
+    </div>
+  </div>
+
+  <div class="controls">
+    <label>Speed</label>
+    <input type="range" id="speed" min="0.3" max="3" step="0.05" value="1">
+    <span class="value" id="speedLabel">1.00×</span>
+  </div>
+
+  <div class="export-row">
+    <button id="exportBtn">⬇ Download MP4</button>
+    <span class="status" id="exportStatus">Renders current state or pattern at 1080×1080 @ 30fps (2 loops for clean cut). WebCodecs required (Chrome / Brave / Edge).</span>
+  </div>
+
+  <p class="legend">
+    States: <code>off</code> = Frame 41233604 · <code>a</code> = Frame 41233603 · <code>b</code> = Frame 41233605 · <code>all-on</code> = composite of A+B (max-blended)
+  </p>
+
+</div>
+
+<script>
+  const layers = {
+    'off':    document.getElementById('layer-off'),
+    'a':      document.getElementById('layer-a'),
+    'b':      document.getElementById('layer-b'),
+    'all-on': document.getElementById('layer-all-on')
+  };
+  const nowShowingEl = document.getElementById('nowShowing');
+
+  function showState(name) {
+    Object.values(layers).forEach(l => l.classList.remove('active'));
+    if (layers[name]) layers[name].classList.add('active');
+    nowShowingEl.textContent = name;
+  }
+
+  // Flicker patterns: [state, durationMs] tuples
+  const patterns = {
+    showcase: [
+      ['all-on', 700], ['a', 220], ['b', 220], ['a', 220], ['all-on', 220],
+      ['b', 320], ['a', 220], ['b', 220], ['all-on', 950],
+      ['a', 120], ['b', 120], ['a', 220], ['all-on', 250]
+    ],
+    rapid: (() => {
+      const seq = [];
+      const states = ['all-on', 'a', 'b', 'off'];
+      for (let i = 0; i < 24; i++) seq.push([states[i % 4], 170]);
+      return seq;
+    })(),
+    steady: [
+      ['off', 1000], ['a', 1000], ['b', 1000], ['all-on', 1000]
+    ],
+    strobe: [
+      ['all-on', 200], ['off', 200], ['all-on', 200], ['off', 200],
+      ['all-on', 200], ['off', 200], ['all-on', 200], ['off', 200],
+      ['all-on', 200], ['off', 200], ['all-on', 200], ['off', 200],
+      ['all-on', 200], ['off', 200], ['all-on', 200], ['off', 200],
+      ['all-on', 200], ['off', 200], ['all-on', 200], ['off', 200]
+    ],
+    pulse: [
+      ['a', 280], ['b', 280], ['a', 280], ['b', 280],
+      ['a', 280], ['b', 280], ['a', 280], ['b', 280],
+      ['a', 280], ['b', 280], ['a', 280], ['b', 280],
+      ['a', 280], ['b', 280]
+    ],
+    glow: [
+      ['all-on', 900], ['off', 500],
+      ['all-on', 900], ['off', 500],
+      ['all-on', 900], ['off', 500],
+      ['all-on', 900], ['off', 500]
+    ]
+  };
+
+  function generateRandomSequence(targetMs) {
+    const seq = [];
+    const states = ['all-on', 'a', 'b', 'off'];
+    let total = 0;
+    while (total < targetMs) {
+      const state = states[Math.floor(Math.random() * states.length)];
+      const dur = 80 + Math.random() * 360;
+      seq.push([state, dur]);
+      total += dur;
+    }
+    return seq;
+  }
+
+  function stateAtTime(t, seq) {
+    const total = seq.reduce((s, [_, d]) => s + d, 0);
+    let tMod = ((t % total) + total) % total;
+    let acc = 0;
+    for (const [state, dur] of seq) {
+      if (tMod < acc + dur) return state;
+      acc += dur;
+    }
+    return seq[seq.length - 1][0];
+  }
+
+  // ===== Mode + realtime =====
+  // Mode is either 'single:<state>' (locked state, no animation) or 'pattern:<name>' (cycling).
+  let currentMode = { kind: 'single', value: 'all-on' };
+  let speedMultiplier = 1;
+  let currentTimer = null;
+  let stepIndex = 0;
+
+  function clearTimer() {
+    if (currentTimer) { clearTimeout(currentTimer); currentTimer = null; }
+  }
+
+  function nextStep() {
+    if (currentMode.kind !== 'pattern') return;
+    let seq;
+    if (currentMode.value === 'random') {
+      const states = ['all-on', 'a', 'b', 'off'];
+      const state = states[Math.floor(Math.random() * states.length)];
+      const dur = 80 + Math.random() * 360;
+      showState(state);
+      currentTimer = setTimeout(nextStep, dur / speedMultiplier);
+      return;
+    }
+    seq = patterns[currentMode.value];
+    if (!seq) return;
+    const [state, dur] = seq[stepIndex];
+    showState(state);
+    stepIndex = (stepIndex + 1) % seq.length;
+    currentTimer = setTimeout(nextStep, dur / speedMultiplier);
+  }
+
+  function setSingleState(state) {
+    clearTimer();
+    currentMode = { kind: 'single', value: state };
+    document.getElementById('stage').classList.remove('glow-mode');
+    showState(state);
+    document.querySelectorAll('#stateRow button').forEach(b => b.classList.toggle('active', b.dataset.state === state));
+    document.querySelectorAll('#patternRow button').forEach(b => b.classList.remove('active'));
+  }
+
+  function setPattern(name) {
+    clearTimer();
+    currentMode = { kind: 'pattern', value: name };
+    stepIndex = 0;
+    // Glow mode uses CSS fade transitions for the breathing effect
+    document.getElementById('stage').classList.toggle('glow-mode', name === 'glow');
+    nextStep();
+    document.querySelectorAll('#patternRow button').forEach(b => b.classList.toggle('active', b.dataset.pattern === name));
+    document.querySelectorAll('#stateRow button').forEach(b => b.classList.remove('active'));
+  }
+
+  document.querySelectorAll('#stateRow button').forEach(b => b.addEventListener('click', () => setSingleState(b.dataset.state)));
+  document.querySelectorAll('#patternRow button').forEach(b => b.addEventListener('click', () => setPattern(b.dataset.pattern)));
+
+  document.getElementById('speed').addEventListener('input', (e) => {
+    speedMultiplier = parseFloat(e.target.value);
+    document.getElementById('speedLabel').textContent = speedMultiplier.toFixed(2) + '×';
+  });
+
+  // ===== MP4 export (WebCodecs + mp4-muxer) =====
+  const exportBtn = document.getElementById('exportBtn');
+  const exportStatus = document.getElementById('exportStatus');
+
+  function setStatus(text, success) {
+    exportStatus.textContent = text;
+    exportStatus.classList.toggle('success', !!success);
+  }
+
+  function loadImg(src) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = src;
+    });
+  }
+
+  function drawImageContain(ctx, img, W, H) {
+    const scale = Math.min(W / img.naturalWidth, H / img.naturalHeight);
+    const w = img.naturalWidth * scale;
+    const h = img.naturalHeight * scale;
+    const x = (W - w) / 2;
+    const y = (H - h) / 2;
+    ctx.drawImage(img, x, y, w, h);
+  }
+
+  async function pickAvcCodec(W, H, FPS, bitrate) {
+    const candidates = ['avc1.640028', 'avc1.4d0028', 'avc1.42E028', 'avc1.42E01F'];
+    for (const codec of candidates) {
+      try {
+        const cfg = { codec, width: W, height: H, bitrate, framerate: FPS };
+        const support = await VideoEncoder.isConfigSupported(cfg);
+        if (support && support.supported) return codec;
+      } catch (_) {}
+    }
+    return null;
+  }
+
+  async function exportMp4() {
+    exportBtn.disabled = true;
+    setStatus('Loading encoder…');
+
+    if (typeof VideoEncoder === 'undefined') {
+      setStatus('WebCodecs not supported — try Chrome / Brave / Edge.');
+      exportBtn.disabled = false;
+      return;
+    }
+
+    let Muxer, ArrayBufferTarget;
+    try {
+      const m = await import('https://cdn.jsdelivr.net/npm/mp4-muxer@5.2.1/+esm');
+      Muxer = m.Muxer;
+      ArrayBufferTarget = m.ArrayBufferTarget;
+    } catch (err) {
+      setStatus('Failed to load mp4-muxer: ' + (err && err.message || err));
+      exportBtn.disabled = false;
+      return;
+    }
+
+    // Determine sequence based on current mode
+    let seq;
+    if (currentMode.kind === 'single') {
+      // Single state = hold for 4 seconds
+      seq = [[currentMode.value, 4000]];
+    } else if (currentMode.value === 'random') {
+      seq = generateRandomSequence(4000);
+    } else {
+      seq = patterns[currentMode.value];
+    }
+    const seqDurMs = seq.reduce((s, [_, d]) => s + d, 0);
+
+    const loops = currentMode.kind === 'single' ? 1 : 2;
+    const totalDurSec = (seqDurMs * loops / 1000) / speedMultiplier;
+    const W = 1080, H = 1080, FPS = 30;
+    const totalFrames = Math.round(FPS * totalDurSec);
+    const bitrate = 10_000_000;
+
+    const codec = await pickAvcCodec(W, H, FPS, bitrate);
+    if (!codec) {
+      setStatus('No H264 codec available.');
+      exportBtn.disabled = false;
+      return;
+    }
+
+    let imgs;
+    try {
+      const [off, a, b, allOn] = await Promise.all([
+        loadImg('00-source-stills/Frame 41233604.png'),
+        loadImg('00-source-stills/Frame 41233603.png'),
+        loadImg('00-source-stills/Frame 41233605.png'),
+        loadImg('00-source-stills/Frame_all-on_composite.png')
+      ]);
+      imgs = { 'off': off, 'a': a, 'b': b, 'all-on': allOn };
+    } catch (err) {
+      setStatus('Failed to load source images: ' + (err && err.message || err));
+      exportBtn.disabled = false;
+      return;
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+
+    let muxer;
+    try {
+      muxer = new Muxer({
+        target: new ArrayBufferTarget(),
+        video: { codec: 'avc', width: W, height: H, frameRate: FPS },
+        fastStart: 'in-memory',
+      });
+    } catch (err) {
+      setStatus('Muxer init failed: ' + (err && err.message || err));
+      exportBtn.disabled = false;
+      return;
+    }
+
+    let encoder;
+    let encoderError = null;
+    try {
+      encoder = new VideoEncoder({
+        output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
+        error: (e) => { encoderError = e; console.error('Encoder error', e); },
+      });
+      encoder.configure({ codec, width: W, height: H, bitrate, framerate: FPS });
+    } catch (err) {
+      setStatus('Encoder setup failed: ' + (err && err.message || err));
+      exportBtn.disabled = false;
+      return;
+    }
+
+    setStatus('Rendering ' + totalFrames + ' frames at 1080×1080 @ 30fps…');
+
+    try {
+      for (let i = 0; i <= totalFrames; i++) {
+        if (encoderError) throw encoderError;
+        const tRealMs = (i / FPS) * 1000;
+        const tSeqMs = tRealMs * speedMultiplier;
+        const state = stateAtTime(tSeqMs, seq);
+
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, W, H);
+        drawImageContain(ctx, imgs[state], W, H);
+
+        const frame = new VideoFrame(canvas, {
+          timestamp: Math.round(i * 1e6 / FPS),
+          duration: Math.round(1e6 / FPS),
+        });
+        encoder.encode(frame, { keyFrame: (i % 30) === 0 });
+        frame.close();
+        if (i % 10 === 0) {
+          setStatus('Encoding… ' + i + '/' + totalFrames + ' frames');
+          await new Promise(r => setTimeout(r, 0));
+        }
+      }
+      await encoder.flush();
+      muxer.finalize();
+    } catch (err) {
+      setStatus('Encode failed: ' + (err && err.message || err));
+      try { encoder.close(); } catch (_) {}
+      exportBtn.disabled = false;
+      return;
+    }
+
+    const buffer = muxer.target.buffer;
+    const blob = new Blob([buffer], { type: 'video/mp4' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const modeSlug = currentMode.kind === 'single' ? ('state-' + currentMode.value) : ('pattern-' + currentMode.value);
+    const speedSlug = speedMultiplier.toFixed(2).replace('.', '-');
+    a.download = 'gemiq-anim-6_' + modeSlug + '_' + speedSlug + 'x.mp4';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+
+    const sizeMb = (blob.size / 1024 / 1024).toFixed(2);
+    setStatus('✓ Saved ' + a.download + ' (' + sizeMb + ' MB, ' + totalDurSec.toFixed(1) + 's)', true);
+    exportBtn.disabled = false;
+  }
+
+  exportBtn.addEventListener('click', exportMp4);
+
+  // Initial state
+  showState('all-on');
+</script>
+
+</body>
+</html>

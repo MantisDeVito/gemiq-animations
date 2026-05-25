@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GemIQ — Animations Status Dashboard</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #f5f7fa; color: #1f2937; font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; }
+
+  .nav { position: sticky; top: 0; background: #fff; border-bottom: 1px solid #e5e7eb; padding: 14px 28px; display: flex; align-items: center; gap: 14px; z-index: 50; box-shadow: 0 1px 3px rgba(0,0,0,0.04); flex-wrap: wrap; }
+  .nav .brand { font-weight: 700; font-size: 15px; letter-spacing: -0.01em; }
+  .nav .brand .crumb { color: #1cb4c0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; margin-right: 8px; font-weight: 700; }
+  .nav a { color: #6b7280; text-decoration: none; font-size: 13px; padding: 6px 10px; border-radius: 6px; transition: all 0.15s; }
+  .nav a:hover { color: #1f2937; background: #f3f4f6; }
+  .nav a.active { color: #1cb4c0; font-weight: 600; background: rgba(28,180,192,0.08); }
+  .nav .spacer { flex: 1; }
+
+  .wrap { max-width: 1400px; margin: 0 auto; padding: 32px 28px 80px; }
+  h1 { font-size: 24px; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.01em; }
+  p.lead { margin: 0 0 28px; color: #6b7280; font-size: 13.5px; line-height: 1.55; max-width: 760px; }
+  p.lead a { color: #1cb4c0; text-decoration: none; font-weight: 600; }
+  p.lead a:hover { text-decoration: underline; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(560px, 1fr)); gap: 20px; }
+
+  .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: box-shadow 0.15s; }
+  .card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+  .card-head { padding: 16px 20px 12px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .card-head .num { font-size: 11px; color: #94a3b8; font-weight: 700; letter-spacing: 0.08em; font-variant-numeric: tabular-nums; }
+  .card-head h2 { font-size: 15.5px; margin: 0; flex: 1; font-weight: 600; letter-spacing: -0.005em; min-width: 200px; }
+  .chip { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 999px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; }
+  .chip.done { background: rgba(34,197,94,0.13); color: #15803d; }
+  .chip.ready { background: rgba(28,180,192,0.13); color: #0e7c84; }
+  .chip.progress { background: rgba(59,130,246,0.13); color: #1d4ed8; }
+  .chip.parked { background: rgba(148,163,184,0.18); color: #475569; }
+  .chip.decision { background: rgba(239,68,68,0.13); color: #b91c1c; }
+
+  .card-asset { background: #fafafa; padding: 14px; border-bottom: 1px solid #f1f5f9; }
+  .card-asset img, .card-asset video { width: 100%; max-height: 340px; object-fit: contain; display: block; border-radius: 6px; background: #fff; }
+  .card-asset iframe { width: 100%; height: 480px; border: none; border-radius: 6px; background: #fff; }
+  .card-asset .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .card-asset .pair > div { display: flex; flex-direction: column; gap: 4px; }
+  .card-asset .pair .label { font-size: 10px; color: #94a3b8; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; }
+  .card-asset .quad { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .card-asset .quad > div { display: flex; flex-direction: column; gap: 4px; }
+  .card-asset .quad .label { font-size: 10px; color: #94a3b8; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700; }
+  .card-asset .quad .label .tag-strong { color: #15803d; }
+
+  .card-body { padding: 14px 20px 18px; }
+  .card-body .notes { font-size: 13px; color: #4b5563; line-height: 1.6; margin: 0 0 14px; }
+  .card-body .notes b { color: #1f2937; }
+  .card-body .next-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: #1cb4c0; font-weight: 700; margin-bottom: 6px; }
+  .card-body .ask { display: inline-block; background: rgba(28,180,192,0.08); border: 1px solid rgba(28,180,192,0.35); border-radius: 6px; padding: 7px 13px; color: #0e7c84; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; cursor: pointer; transition: background 0.15s; line-height: 1.45; }
+  .card-body .ask:hover { background: rgba(28,180,192,0.18); }
+  .card-body .extra { margin-top: 10px; font-size: 11.5px; color: #6b7280; }
+  .card-body .extra a { color: #1cb4c0; text-decoration: none; }
+  .card-body .extra a:hover { text-decoration: underline; }
+  .download-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .download-row a { display: inline-flex; align-items: center; gap: 5px; padding: 7px 13px; background: #1cb4c0; color: #fff; border-radius: 6px; font-size: 11.5px; font-weight: 600; text-decoration: none; letter-spacing: 0.02em; }
+  .download-row a:hover { filter: brightness(1.1); }
+  .download-row a.secondary { background: #fff; color: #0e7c84; border: 1px solid #1cb4c0; }
+  .download-row a .size { color: rgba(255,255,255,0.65); font-weight: 400; font-size: 10.5px; }
+  .download-row a.secondary .size { color: #94a3b8; }
+
+  .card-foot { padding: 10px 20px; border-top: 1px solid #f1f5f9; background: #fafbfc; }
+  .card-foot a { font-size: 11.5px; color: #94a3b8; text-decoration: none; }
+  .card-foot a:hover { color: #1cb4c0; }
+
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1f2937; color: #fff; padding: 9px 16px; border-radius: 8px; font-size: 13px; box-shadow: 0 8px 24px rgba(0,0,0,0.18); opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 100; }
+
+  /* ===== Fullscreen modal (flick + compare) ===== */
+  .card-asset img, .card-asset video { cursor: zoom-in !important; }
+  .modal { position: fixed; inset: 0; background: rgba(15,23,42,0.97); z-index: 1000; display: none; padding: 60px 90px; backdrop-filter: blur(12px); }
+  .modal.active { display: block; }
+  .modal-content { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; position: relative; }
+  .modal-content img, .modal-content video { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px; box-shadow: 0 20px 80px rgba(0,0,0,0.6); display: block; background: #000; }
+  .modal.compare .modal-content { display: grid; gap: 14px; align-items: stretch; }
+  .modal.compare .compare-item { display: flex; flex-direction: column; align-items: stretch; min-width: 0; min-height: 0; gap: 6px; background: rgba(255,255,255,0.04); padding: 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); }
+  .modal.compare .compare-item img, .modal.compare .compare-item video { width: 100%; height: 0; flex: 1; object-fit: contain; cursor: zoom-in; border-radius: 6px; background: #000; min-height: 0; }
+  .modal.compare .compare-item .label { font-size: 10.5px; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.06em; text-align: center; padding: 4px; font-weight: 600; flex-shrink: 0; }
+  .modal-btn { position: fixed; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18); color: #fff; cursor: pointer; padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; transition: all 0.15s; z-index: 1001; backdrop-filter: blur(8px); display: none; }
+  .modal.active .modal-btn { display: block; }
+  .modal-btn:hover { background: rgba(255,255,255,0.22); }
+  .modal-prev { left: 20px; top: 50%; transform: translateY(-50%); width: 52px; height: 52px; padding: 0; font-size: 26px; border-radius: 50%; }
+  .modal-next { right: 20px; top: 50%; transform: translateY(-50%); width: 52px; height: 52px; padding: 0; font-size: 26px; border-radius: 50%; }
+  .modal-close { top: 20px; right: 20px; width: 44px; height: 44px; padding: 0; font-size: 18px; border-radius: 50%; }
+  .modal-compare-btn { top: 20px; left: 20px; }
+  .modal-compare-btn.active { background: #1cb4c0; color: #fff; border-color: #1cb4c0; }
+  .modal.compare .modal-prev, .modal.compare .modal-next { display: none !important; }
+  .modal-meta { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.7); color: #fff; padding: 8px 18px; border-radius: 999px; font-size: 12px; font-weight: 500; max-width: 80vw; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; z-index: 1001; display: none; }
+  .modal.active .modal-meta { display: block; }
+  .modal-hints { position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.45); font-size: 11px; text-align: center; pointer-events: none; z-index: 1001; display: none; }
+  .modal.active .modal-hints { display: block; }
+  .modal-hints kbd { background: rgba(255,255,255,0.1); padding: 1px 6px; border-radius: 3px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 10px; margin: 0 2px; }
+  .toast.show { opacity: 1; }
+
+  @media (max-width: 720px) {
+    .grid { grid-template-columns: 1fr; }
+    .card-asset .pair, .card-asset .quad { grid-template-columns: 1fr; }
+    .nav { padding: 12px 16px; }
+    .wrap { padding: 24px 16px 60px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="brand"><span class="crumb">GemIQ</span>Status dashboard</div>
+  <div class="spacer"></div>
+  <a class="active" href="anim-status.html">Dashboard</a>
+  <a href="approval-review.html?v=2026-05-25-1300-originals">Full reviewer</a>
+  <a href="anim-4-spin-preview.html">Anim 4 viewer</a>
+  <a href="anim-6-led-flicker.html">Anim 6 LED</a>
+</nav>
+
+<div class="wrap">
+
+  <h1>GemIQ — animations status</h1>
+  <p class="lead">Snapshot of where each of the 6 animations is right now — current best asset + next step. For all candidates, iteration history, comments and decisions, use the <a href="approval-review.html?v=2026-05-25-1300-originals">full reviewer</a>. Click any teal next-step block to copy it.</p>
+
+  <div class="grid">
+
+    <!-- ============= ANIM 1 ============= -->
+    <article class="card">
+      <div class="card-head">
+        <span class="num">ANIM 1</span>
+        <h2>Phone tap — "One tap. Studio quality."</h2>
+        <span class="chip done">🟢 Seamless loop stitched — 6s tap + retract</span>
+      </div>
+      <div class="card-asset">
+        <video src="01-gens/anim-1-phone-tap/_premiere-tap-button_v1.mp4" autoplay loop muted playsinline controls style="max-height:520px;"></video>
+      </div>
+      <div class="card-body">
+        <p class="notes"><b>Stage:</b> <b>Premiere cut — box-seam line fix applied.</b> You fixed the disappearing seam on the box's right side in Premiere. 4.29s, 1720×1204. This is the canonical Anim 1 master.</p>
+        <div class="next-label">→ Next step</div>
+        <span class="ask">anim 1 — lock the Premiere cut</span>
+        <div class="download-row">
+          <a href="01-gens/anim-1-phone-tap/_premiere-tap-button_v1.mp4" download>⬇ MP4 <span class="size">2.3 MB</span></a>
+          <a href="01-gens/anim-1-phone-tap/_premiere-tap-button_v1.webm" download class="secondary">⬇ WebM <span class="size">113 KB</span></a>
+        </div>
+        <div class="extra">earlier auto loops: <a href="01-gens/anim-1-phone-tap/_anim-1_seamless-loop-v6-minus1s.mp4">v6</a> · <a href="01-gens/anim-1-phone-tap/_anim-1_seamless-loop-v5-trimmed.mp4">v5</a> · <a href="01-gens/anim-1-phone-tap/_anim-1_seamless-loop-v4.mp4">v4</a> · raw clips bundle: <a href="01-gens/anim-1-phone-tap/_premiere-bundle/">_premiere-bundle/</a></div>
+      </div>
+      <div class="card-foot">
+        <a href="approval-review.html?v=2026-05-25-1300-originals">Show all variants in reviewer →</a>
+      </div>
+    </article>
+
+    <!-- ============= ANIM 2 ============= -->
+    <article class="card">
+      <div class="card-head">
+        <span class="num">ANIM 2</span>
+        <h2>Direct Shopify integration</h2>
+        <span class="chip ready">🟡 Composite tool ready — tune + export</span>
+      </div>
+      <div class="card-asset">
+        <iframe src="anim-2-composite.html" style="width:100%;height:520px;border:none;border-radius:6px;background:#0a0a0c;"></iframe>
+      </div>
+      <div class="card-body">
+        <p class="notes"><b>Stage:</b> <b>Base re-fired v2 — matched pair, no bounce, no opacity flicker.</b> New 1920×1080 base (vs original 1284×716) built with NBP-derived no-hands frame for matched-pair stability + explicit "monitor + stand 100% static, no opacity change" prompts. Compositor upgraded: number-of-beams slider, beam stagger, any-colour picker, opacity sliders (monitor flash / laser glow / laser core), preset save/load via localStorage, fullscreen button, WebM export. Click <b>Download composite MP4/WebM</b> inside the tool.</p>
+        <div class="next-label">→ Next step</div>
+        <span class="ask">anim 2 — open anim-2-composite.html in its own tab and tune the laser timing, then export</span>
+        <div class="extra">Open in its own tab → <a href="anim-2-composite.html">anim-2-composite.html</a> · Original loop: <code>01-gens/anim-2-shopify/_seamless-loop.mp4</code></div>
+      </div>
+      <div class="card-foot">
+        <a href="approval-review.html?v=2026-05-25-1300-originals">Show all variants + V7 demo in reviewer →</a>
+      </div>
+    </article>
+
+    <!-- ============= ANIM 3 ============= -->
+    <article class="card">
+      <div class="card-head">
+        <span class="num">ANIM 3</span>
+        <h2>Plug-in — phone-light dock</h2>
+        <span class="chip done">🟢 v2 seamless loop from originals — hands in + out</span>
+      </div>
+      <div class="card-asset">
+        <video src="01-gens/anim-3-plug-in/_anim-3_FINAL-composite-v9.mp4" autoplay loop muted playsinline controls style="max-height:520px;"></video>
+      </div>
+      <div class="card-body">
+        <p class="notes"><b>Stage:</b> <b>v9 composite — right side updated to Premiere Anim 1.</b> Left half = v7 clean dock + cable loop (6s). Right half = `_premiere-tap-button_v1.mp4` (Callum's Premiere fix, 4.29s) + 1.79s held still to match. hstack into 1920×1080 16:9 6s loop.</p>
+        <div class="next-label">→ Next step</div>
+        <span class="ask">anim 3 — lock the v9 composite</span>
+        <div class="download-row">
+          <a href="01-gens/anim-3-plug-in/_anim-3_FINAL-composite-v9.mp4" download>⬇ Composite MP4 <span class="size">932 KB</span></a>
+          <a href="01-gens/anim-3-plug-in/_anim-3_FINAL-composite-v9.webm" download class="secondary">⬇ Composite WebM <span class="size">247 KB</span></a>
+          <a href="01-gens/anim-3-plug-in/_anim-3_LEFT-clean_loop-v7.mp4" download class="secondary">⬇ LEFT only MP4 <span class="size">2.3 MB</span></a>
+          <a href="01-gens/anim-3-plug-in/_anim-3_LEFT-clean_loop-v7.webm" download class="secondary">⬇ LEFT only WebM <span class="size">273 KB</span></a>
+        </div>
+        <div class="extra">backups: <a href="01-gens/anim-3-plug-in/_anim-3_FINAL-composite-v8.mp4">v8 composite (old Anim 1)</a> · individual v7 clips: <a href="01-gens/anim-3-plug-in/anim-3_LEFT-clean_plug-in_v7.mp4">plug-in</a> · <a href="01-gens/anim-3-plug-in/anim-3_LEFT-clean_plug-out_v7.mp4">plug-out</a></div>
+      </div>
+      <div class="card-foot">
+        <a href="approval-review.html?v=2026-05-25-1300-originals">Show all variants in reviewer →</a>
+      </div>
+    </article>
+
+    <!-- ============= ANIM 4 ============= -->
+    <article class="card">
+      <div class="card-head">
+        <span class="num">ANIM 4</span>
+        <h2>Phone-light 360° spin → catch</h2>
+        <span class="chip done">🟢 Full stitch — tune speed</span>
+      </div>
+      <div class="card-asset">
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <video id="anim4-full" src="01-gens/anim-4-phone-spin/_anim-4_SEAMLESS-LOOP_4K-4x-upscaled.mp4" autoplay loop muted playsinline controls></video>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:#f1f5f9;border-radius:6px;font-size:11px;">
+            <span style="color:#475569;font-weight:600;letter-spacing:.04em;text-transform:uppercase;">Speed</span>
+            <input id="anim4-speed" type="range" min="0.25" max="16" step="0.05" value="1" style="flex:1;accent-color:#1cb4c0;">
+            <span id="anim4-speed-val" style="color:#0e7c84;font-weight:700;font-variant-numeric:tabular-nums;min-width:50px;text-align:right;">1.00×</span>
+            <span id="anim4-eff-val" style="color:#94a3b8;font-weight:500;font-variant-numeric:tabular-nums;min-width:70px;text-align:right;">≈ 22.0s</span>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="anim4-preset" data-speed="0.4">0.4× (~16s)</button>
+            <button class="anim4-preset" data-speed="0.65">0.65× (~10s)</button>
+            <button class="anim4-preset" data-speed="1.0">1.0× · 4K raw (~6.5s)</button>
+            <button class="anim4-preset" data-speed="1.3">1.3× (~5s)</button>
+            <button class="anim4-preset" data-speed="1.6">1.6× (~4s)</button>
+            <button class="anim4-preset" data-speed="2.0">2.0× (~3s)</button>
+            <button class="anim4-preset" data-speed="3.2">3.2× (~2s)</button>
+            <button class="anim4-preset" data-speed="4.6">4.6× (~1.4s)</button>
+          </div>
+        </div>
+        <style>
+          .anim4-preset { padding:5px 9px; font-size:10.5px; background:#fff; border:1px solid #e5e7eb; border-radius:4px; cursor:pointer; color:#475569; transition:all .12s; }
+          .anim4-preset:hover { background:#1cb4c0; color:#fff; border-color:#1cb4c0; }
+        </style>
+      </div>
+      <div class="card-body">
+        <p class="notes"><b>Stage:</b> <b>SEAMLESS LOOP (25.46s)</b> — De-stuttered Premiere spin+catch + your new Higgsfield bridge clip (hand exits right, ends at the front-on phone-light position that matches the start of the spin). End of loop = start of loop → plays infinitely without a visible cut. Speed slider 0.25× → 16×.</p>
+        <div class="next-label">→ Next step</div>
+        <span class="ask">anim 4 — lock speed at [N.NN×] and bake the final</span>
+        <div class="download-row">
+          <a href="01-gens/anim-4-phone-spin/_anim-4_SEAMLESS-LOOP_4K-4x-upscaled.mp4" download>⬇ 4K MP4 <span class="size">9.5 MB</span></a>
+          <a href="01-gens/anim-4-phone-spin/_anim-4_SEAMLESS-LOOP_4K-4x-upscaled.webm" download class="secondary">⬇ 4K WebM <span class="size">2.2 MB</span></a>
+          <a href="01-gens/anim-4-phone-spin/_anim-4_SEAMLESS-LOOP.mp4" download class="secondary">⬇ Original MP4 <span class="size">1.8 MB</span></a>
+        </div>
+        <div class="extra"><b>NEW bridge clip (loops back to spin start):</b> <a href="01-gens/anim-4-phone-spin/anim-4_bridge-to-spin-start_v2.mp4">anim-4_bridge-to-spin-start_v2.mp4</a> · Premiere bundle: <a href="01-gens/anim-4-phone-spin/_premiere-bundle/spin-in-order/">spin-in-order/</a> · <a href="01-gens/anim-4-phone-spin/_premiere-bundle/hand-attempts-chronological/">hand-attempts/</a> · <a href="anim-4-spin-preview.html">5-clip viewer</a></div>
+      </div>
+      <div class="card-foot">
+        <a href="approval-review.html?v=2026-05-25-1300-originals">Show all keyframes + clips in reviewer →</a>
+      </div>
+    </article>
+
+    <!-- ============= ANIM 5 ============= -->
+    <article class="card">
+      <div class="card-head">
+        <span class="num">ANIM 5</span>
+        <h2>Box open and close</h2>
+        <span class="chip done">🟢 Open + close loop stitched</span>
+      </div>
+      <div class="card-asset">
+        <video src="01-gens/shot-01-box-lid-loop/_stitched-loop.mp4" autoplay loop muted playsinline controls></video>
+      </div>
+      <div class="card-body">
+        <p class="notes"><b>Stage:</b> Full open + close loop stitched (01a opening + 01b closing concatenated → <code>_stitched-loop.mp4</code>). Plays as infinite loop above. Box still reads as black-walled in current gens — we now know it's actually white. Revive + re-gen against white-box ref only on explicit request.</p>
+        <div class="next-label">→ Next step</div>
+        <span class="ask">anim 5 — revive and re-gen against the white-box reference</span>
+      </div>
+      <div class="card-foot">
+        <a href="approval-review.html?v=2026-05-25-1300-originals">Show all variants in reviewer →</a>
+      </div>
+    </article>
+
+    <!-- ============= ANIM 6 ============= -->
+    <article class="card">
+      <div class="card-head">
+        <span class="num">ANIM 6</span>
+        <h2>LED flash patterns (browser)</h2>
+        <span class="chip ready">🟡 Ready to lock</span>
+      </div>
+      <div class="card-asset">
+        <iframe src="anim-6-led-flicker.html"></iframe>
+      </div>
+      <div class="card-body">
+        <p class="notes"><b>Stage:</b> Non-AI browser animation. Live preview above — try different patterns + speed in the embedded iframe. Hit <b>Download MP4</b> inside it (or open in its own tab) to export the final.</p>
+        <div class="next-label">→ Next step</div>
+        <span class="ask">anim 6 — pattern + speed locked (which one?)</span>
+        <div class="extra">Open in its own tab → <a href="anim-6-led-flicker.html">anim-6-led-flicker.html</a></div>
+      </div>
+      <div class="card-foot">
+        <a href="approval-review.html?v=2026-05-25-1300-originals">Show source files in reviewer →</a>
+      </div>
+    </article>
+
+  </div>
+</div>
+
+<!-- Fullscreen modal for asset preview + compare -->
+<div class="modal" id="modal">
+  <div class="modal-content" id="modal-content"></div>
+  <button class="modal-btn modal-prev" id="modal-prev" title="Previous (←)">‹</button>
+  <button class="modal-btn modal-next" id="modal-next" title="Next (→)">›</button>
+  <button class="modal-btn modal-close" id="modal-close" title="Close (Esc)">✕</button>
+  <button class="modal-btn modal-compare-btn" id="modal-compare" title="Toggle compare (C)">⊞ Compare all</button>
+  <div class="modal-meta" id="modal-meta"></div>
+  <div class="modal-hints"><kbd>←</kbd> <kbd>→</kbd> flick · <kbd>G</kbd> compare grid · <kbd>Esc</kbd> close</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const toast = document.getElementById('toast');
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 1500);
+  }
+  document.querySelectorAll('.ask').forEach(el => {
+    el.title = 'Click to copy';
+    el.addEventListener('click', () => {
+      const t = el.textContent.trim();
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(t).then(() => showToast('Copied to clipboard'));
+      }
+    });
+  });
+
+  // ===== Fullscreen modal: flick + compare =====
+  const modal = document.getElementById('modal');
+  const modalContent = document.getElementById('modal-content');
+  const modalMeta = document.getElementById('modal-meta');
+  const prevBtn = document.getElementById('modal-prev');
+  const nextBtn = document.getElementById('modal-next');
+  const closeBtn = document.getElementById('modal-close');
+  const compareBtn = document.getElementById('modal-compare');
+
+  let modalState = null; // { assets, idx, isCompare, cardTitle }
+
+  function makeMedia(asset, opts) {
+    opts = opts || {};
+    let m;
+    if (asset.type === 'video') {
+      m = document.createElement('video');
+      m.src = asset.src;
+      m.autoplay = true;
+      m.loop = true;
+      m.muted = true;
+      m.playsInline = true;
+      if (opts.controls) m.controls = true;
+    } else {
+      m = document.createElement('img');
+      m.src = asset.src;
+      m.alt = asset.label || '';
+    }
+    return m;
+  }
+
+  function openModal(assets, idx, cardTitle) {
+    modalState = { assets, idx, isCompare: false, cardTitle: cardTitle || '' };
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    renderModal();
+  }
+
+  function closeModal() {
+    modal.classList.remove('active', 'compare');
+    document.body.style.overflow = '';
+    modalContent.replaceChildren();
+    modalContent.style.gridTemplateColumns = '';
+    modalContent.style.gridTemplateRows = '';
+    modalState = null;
+  }
+
+  function renderModal() {
+    if (!modalState) return;
+    modalContent.replaceChildren();
+    if (modalState.isCompare) {
+      modal.classList.add('compare');
+      const n = modalState.assets.length;
+      const cols = n <= 2 ? n : (n <= 4 ? 2 : 3);
+      const rows = Math.ceil(n / cols);
+      modalContent.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+      modalContent.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+      modalState.assets.forEach((a, i) => {
+        const item = document.createElement('div');
+        item.className = 'compare-item';
+        const media = makeMedia(a);
+        media.addEventListener('click', e => {
+          e.stopPropagation();
+          modalState.isCompare = false;
+          modalState.idx = i;
+          modal.classList.remove('compare');
+          renderModal();
+        });
+        const label = document.createElement('span');
+        label.className = 'label';
+        label.textContent = a.label || `${i + 1} / ${n}`;
+        item.appendChild(media);
+        item.appendChild(label);
+        modalContent.appendChild(item);
+      });
+      modalMeta.textContent = (modalState.cardTitle ? modalState.cardTitle + ' · ' : '') + 'Compare all (' + n + ')';
+      compareBtn.classList.add('active');
+      compareBtn.textContent = '◱ Single view';
+    } else {
+      modal.classList.remove('compare');
+      modalContent.style.gridTemplateColumns = '';
+      modalContent.style.gridTemplateRows = '';
+      const a = modalState.assets[modalState.idx];
+      const media = makeMedia(a, { controls: true });
+      modalContent.appendChild(media);
+      modalMeta.textContent = (modalState.cardTitle ? modalState.cardTitle + ' · ' : '') + (a.label || '(no label)') + ' · ' + (modalState.idx + 1) + ' / ' + modalState.assets.length;
+      compareBtn.classList.remove('active');
+      compareBtn.textContent = '⊞ Compare all';
+      const showNav = modalState.assets.length > 1;
+      prevBtn.style.display = showNav ? 'block' : 'none';
+      nextBtn.style.display = showNav ? 'block' : 'none';
+    }
+    compareBtn.style.display = modalState.assets.length > 1 ? 'block' : 'none';
+  }
+
+  function navModal(delta) {
+    if (!modalState || modalState.isCompare) return;
+    const n = modalState.assets.length;
+    modalState.idx = (modalState.idx + delta + n) % n;
+    renderModal();
+  }
+
+  prevBtn.addEventListener('click', e => { e.stopPropagation(); navModal(-1); });
+  nextBtn.addEventListener('click', e => { e.stopPropagation(); navModal(1); });
+  closeBtn.addEventListener('click', e => { e.stopPropagation(); closeModal(); });
+  compareBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    if (!modalState) return;
+    modalState.isCompare = !modalState.isCompare;
+    renderModal();
+  });
+  modal.addEventListener('click', e => {
+    if (e.target === modal || e.target === modalContent) closeModal();
+  });
+  document.addEventListener('keydown', e => {
+    if (!modal.classList.contains('active')) return;
+    if (e.ctrlKey || e.metaKey || e.altKey) return; // let Ctrl+C / Cmd+C copy
+    if (e.key === 'Escape') { e.preventDefault(); closeModal(); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); navModal(-1); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); navModal(1); }
+    else if (e.key === 'g' || e.key === 'G') { e.preventDefault(); compareBtn.click(); }
+  });
+
+  // ===== Anim 4 — playback speed control =====
+  (function(){
+    const v = document.getElementById('anim4-full');
+    const r = document.getElementById('anim4-speed');
+    const lbl = document.getElementById('anim4-speed-val');
+    const eff = document.getElementById('anim4-eff-val');
+    if (!v || !r) return;
+    const baseDur = 6.46;
+    function apply(rate){
+      v.playbackRate = rate;
+      lbl.textContent = rate.toFixed(2) + '×';
+      const effDur = baseDur / rate;
+      eff.textContent = '≈ ' + effDur.toFixed(1) + 's';
+    }
+    r.addEventListener('input', () => apply(parseFloat(r.value)));
+    document.querySelectorAll('.anim4-preset').forEach(b => {
+      b.addEventListener('click', () => {
+        const sp = parseFloat(b.dataset.speed);
+        r.value = sp;
+        apply(sp);
+      });
+    });
+    apply(1.0);
+  })();
+
+  // Collect each card's assets + wire click-to-fullscreen
+  document.querySelectorAll('.card').forEach(card => {
+    const titleEl = card.querySelector('.card-head h2');
+    const cardTitle = titleEl ? titleEl.textContent.trim() : '';
+    const mediaEls = card.querySelectorAll('.card-asset img, .card-asset video');
+    if (mediaEls.length === 0) return;
+    const assets = [...mediaEls].map(el => {
+      const wrapper = el.closest('.quad > div, .pair > div');
+      const labelEl = wrapper ? wrapper.querySelector('.label') : null;
+      const label = (labelEl ? labelEl.textContent : (el.alt || '')).trim();
+      return {
+        type: el.tagName.toLowerCase(),
+        src: el.src || el.currentSrc,
+        label
+      };
+    });
+    mediaEls.forEach((el, idx) => {
+      el.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        openModal(assets, idx, cardTitle);
+      });
+    });
+  });
+</script>
+
+</body>
+</html>

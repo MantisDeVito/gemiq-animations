@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Anim 2 — V7 laser-arc composite</title>
+<style>
+  :root { --teal:#1cb4c0; --teal-soft:rgba(28,180,192,0.32); --bg:#0a0a0c; --panel:#16161a; --line:#2a2a2e; --text:#e4e4e7; --dim:#a1a1aa; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:13px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
+  .wrap{display:grid;grid-template-columns:1fr 320px;min-height:100vh;gap:0;}
+  .stage{display:flex;align-items:center;justify-content:center;padding:20px;background:#000;position:relative;}
+  .canvas-frame{position:relative;width:100%;max-width:1100px;aspect-ratio:1284/716;background:#000;}
+  canvas{position:absolute;inset:0;width:100%;height:100%;}
+  video.hidden{position:absolute;left:-9999px;width:1px;height:1px;opacity:0;}
+  .controls{padding:18px;background:var(--panel);border-left:1px solid var(--line);overflow-y:auto;}
+  h1{margin:0 0 4px;font-size:13px;font-weight:700;color:var(--teal);letter-spacing:.06em;text-transform:uppercase;}
+  .sub{font-size:11px;color:var(--dim);margin-bottom:18px;}
+  .row{margin-bottom:14px;}
+  .row label{display:block;font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;}
+  .row .val{float:right;color:var(--teal);font-variant-numeric:tabular-nums;font-weight:600;}
+  input[type=range]{width:100%;accent-color:var(--teal);}
+  .btn{display:block;width:100%;margin-top:6px;padding:9px 12px;background:var(--teal);color:#000;border:none;font-weight:700;cursor:pointer;border-radius:4px;font-size:12px;letter-spacing:.04em;text-transform:uppercase;}
+  .btn:hover{filter:brightness(1.12);}
+  .btn.secondary{background:#222;color:var(--text);border:1px solid var(--line);}
+  .btn:disabled{opacity:.4;cursor:wait;}
+  .status{margin-top:12px;padding:10px;background:#000;border:1px solid var(--line);border-radius:4px;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:11px;color:var(--dim);min-height:36px;white-space:pre-wrap;}
+  .status.ok{color:#86efac;border-color:#166534;}
+  .status.err{color:#fca5a5;border-color:#7f1d1d;}
+  .group{margin:24px 0 10px;font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--line);padding-bottom:6px;}
+  .toggle{display:flex;gap:8px;}
+  .toggle button{flex:1;padding:6px;background:#222;border:1px solid var(--line);color:var(--text);cursor:pointer;font-size:11px;border-radius:3px;}
+  .toggle button.active{background:var(--teal);color:#000;border-color:var(--teal);font-weight:700;}
+  .swatch{display:flex;gap:6px;margin-top:4px;}
+  .swatch button{width:32px;height:24px;border-radius:3px;border:2px solid transparent;cursor:pointer;}
+  .swatch button.active{border-color:#fff;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="stage">
+    <div class="canvas-frame">
+      <canvas id="cv" width="1284" height="716"></canvas>
+      <video id="src" class="hidden" muted playsinline preload="auto" crossorigin="anonymous">
+        <source src="01-gens/anim-2-shopify/_seamless-loop-v3.mp4" type="video/mp4">
+      </video>
+    </div>
+  </div>
+
+  <div class="controls">
+    <h1>Anim 2 — V7 composite</h1>
+    <div class="sub">Source: _seamless-loop-v2.mp4 · 1928×1076 (~1920×1080) · 6.08s · 24fps. NBP-matched pair + anti-bounce / anti-opacity prompt. Overlay: V7 travelling laser arc.</div>
+
+    <div class="group">Playback</div>
+    <div class="toggle">
+      <button id="btnPlay" class="active">▶ Play loop</button>
+      <button id="btnPause">⏸ Pause</button>
+    </div>
+
+    <div class="group">Laser timing</div>
+    <div class="row">
+      <label>Laser start <span class="val" id="vStart">1.00s</span></label>
+      <input type="range" id="iStart" min="0" max="5" step="0.05" value="1.0">
+    </div>
+    <div class="row">
+      <label>Laser duration <span class="val" id="vDur">1.80s</span></label>
+      <input type="range" id="iDur" min="0.6" max="3.5" step="0.05" value="1.8">
+    </div>
+    <div class="row">
+      <label>Monitor flash delay <span class="val" id="vFlash">+0.10s</span></label>
+      <input type="range" id="iFlash" min="-0.2" max="0.5" step="0.02" value="0.1">
+    </div>
+
+    <div class="group">Laser look</div>
+    <div class="row">
+      <label>Stroke thickness <span class="val" id="vStroke">5</span></label>
+      <input type="range" id="iStroke" min="2" max="10" step="0.5" value="5">
+    </div>
+    <div class="row">
+      <label>Glow strength (size) <span class="val" id="vGlow">1.00</span></label>
+      <input type="range" id="iGlowS" min="0.2" max="2" step="0.05" value="1.0">
+    </div>
+    <div class="row">
+      <label>Beam head length <span class="val" id="vHead">250 px</span></label>
+      <input type="range" id="iHead" min="80" max="2000" step="10" value="250">
+    </div>
+    <div class="row">
+      <label>Number of beams <span class="val" id="vBeams">1</span></label>
+      <input type="range" id="iBeams" min="1" max="5" step="1" value="1">
+    </div>
+    <div class="row">
+      <label>Beam stagger <span class="val" id="vStagger">0.15s</span></label>
+      <input type="range" id="iStagger" min="0" max="1" step="0.02" value="0.15">
+    </div>
+
+    <div class="group">Opacity</div>
+    <div class="row">
+      <label>Monitor flash opacity <span class="val" id="vMonOp">0.55</span></label>
+      <input type="range" id="iMonOp" min="0" max="1" step="0.02" value="0.55">
+    </div>
+    <div class="row">
+      <label>Laser glow opacity <span class="val" id="vGlowOp">1.00</span></label>
+      <input type="range" id="iGlowOp" min="0" max="1" step="0.02" value="1.0">
+    </div>
+    <div class="row">
+      <label>Laser core opacity <span class="val" id="vCoreOp">1.00</span></label>
+      <input type="range" id="iCoreOp" min="0" max="1" step="0.02" value="1.0">
+    </div>
+    <div class="row">
+      <label>Colour <span class="val" id="vColour">#1cb4c0</span></label>
+      <input type="color" id="iColour" value="#1cb4c0" style="width:100%;height:38px;border:1px solid var(--line);border-radius:4px;background:transparent;cursor:pointer;">
+      <div class="swatch" id="swatch" style="margin-top:6px;">
+        <button data-c="#1cb4c0" class="active" style="background:#1cb4c0" title="teal"></button>
+        <button data-c="#ffffff" style="background:#fff" title="white"></button>
+        <button data-c="#7dd3fc" style="background:#7dd3fc" title="sky"></button>
+        <button data-c="#a78bfa" style="background:#a78bfa" title="violet"></button>
+        <button data-c="#fbbf24" style="background:#fbbf24" title="amber"></button>
+        <button data-c="#f87171" style="background:#f87171" title="red"></button>
+        <button data-c="#10b981" style="background:#10b981" title="emerald"></button>
+      </div>
+    </div>
+
+    <div class="group">Presets</div>
+    <div class="row" style="display:flex;gap:6px;">
+      <select id="presetSelect" style="flex:1;padding:8px;background:#0a0a0c;color:var(--text);border:1px solid var(--line);border-radius:4px;font-size:12px;">
+        <option value="">— Load saved preset —</option>
+      </select>
+    </div>
+    <div class="row" style="display:flex;gap:6px;">
+      <input type="text" id="presetName" placeholder="preset name" style="flex:1;padding:7px 9px;background:#0a0a0c;color:var(--text);border:1px solid var(--line);border-radius:4px;font-size:12px;">
+      <button class="btn secondary" id="btnPresetSave" style="margin-top:0;flex:0 0 auto;padding:7px 12px;font-size:11px;">Save</button>
+      <button class="btn secondary" id="btnPresetDel" style="margin-top:0;flex:0 0 auto;padding:7px 12px;font-size:11px;">Delete</button>
+    </div>
+
+    <div class="group">Export</div>
+    <div class="row">
+      <label>Output resolution</label>
+      <div class="toggle" id="resToggle">
+        <button data-w="1928" data-h="1076" class="active">Native 1928×1076</button>
+        <button data-w="1920" data-h="1080">1920×1080</button>
+      </div>
+    </div>
+    <button class="btn" id="btnExport">⬇ Download composite MP4</button>
+    <button class="btn secondary" id="btnExportWebM">⬇ Download composite WebM</button>
+    <button class="btn secondary" id="btnFullscreen">⛶ Fullscreen preview</button>
+    <button class="btn secondary" id="btnSnap">Snapshot current frame (PNG)</button>
+    <div class="status" id="status">Ready.</div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('cv');
+const ctx = canvas.getContext('2d');
+const video = document.getElementById('src');
+const statusEl = document.getElementById('status');
+
+const cfg = {
+  laserStart: 1.0,
+  laserDur:   1.8,
+  flashDelay: 0.10,
+  stroke: 5,
+  glow: 1.0,
+  head: 250,
+  beams: 1,
+  stagger: 0.15,
+  colour: '#1cb4c0',
+  monOpacity:  0.55,
+  glowOpacity: 1.0,
+  coreOpacity: 1.0,
+  outW: 1928, outH: 1076,
+  loopLen: 6.083,
+  fps: 24,
+};
+
+// ===== Presets (localStorage) =====
+const PRESET_KEY = 'anim2_presets_v1';
+const PRESET_FIELDS = ['laserStart','laserDur','flashDelay','stroke','glow','head','beams','stagger','colour','monOpacity','glowOpacity','coreOpacity'];
+function loadPresets(){ try { return JSON.parse(localStorage.getItem(PRESET_KEY) || '{}'); } catch(e){ return {}; } }
+function savePresets(p){ localStorage.setItem(PRESET_KEY, JSON.stringify(p)); }
+function refreshPresetSelect(){
+  const sel = document.getElementById('presetSelect');
+  const presets = loadPresets();
+  while (sel.firstChild) sel.removeChild(sel.firstChild);
+  const placeholder = document.createElement('option');
+  placeholder.value = '';
+  placeholder.textContent = '— Load saved preset —';
+  sel.appendChild(placeholder);
+  Object.keys(presets).sort().forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name; opt.textContent = name;
+    sel.appendChild(opt);
+  });
+}
+function applyPreset(name){
+  const presets = loadPresets();
+  if (!presets[name]) return;
+  const p = presets[name];
+  PRESET_FIELDS.forEach(f => { if (p[f] !== undefined) cfg[f] = p[f]; });
+  document.getElementById('iStart').value = cfg.laserStart;
+  document.getElementById('iDur').value = cfg.laserDur;
+  document.getElementById('iFlash').value = cfg.flashDelay;
+  document.getElementById('iStroke').value = cfg.stroke;
+  document.getElementById('iGlowS').value = cfg.glow;
+  document.getElementById('iHead').value = cfg.head;
+  document.getElementById('iBeams').value = cfg.beams;
+  document.getElementById('iStagger').value = cfg.stagger;
+  document.getElementById('iColour').value = cfg.colour;
+  document.getElementById('iMonOp').value = cfg.monOpacity;
+  document.getElementById('iGlowOp').value = cfg.glowOpacity;
+  document.getElementById('iCoreOp').value = cfg.coreOpacity;
+  document.getElementById('vStart').textContent = cfg.laserStart.toFixed(2)+'s';
+  document.getElementById('vDur').textContent = cfg.laserDur.toFixed(2)+'s';
+  document.getElementById('vFlash').textContent = (cfg.flashDelay>=0?'+':'') + cfg.flashDelay.toFixed(2)+'s';
+  document.getElementById('vStroke').textContent = cfg.stroke.toFixed(1);
+  document.getElementById('vGlow').textContent = cfg.glow.toFixed(2);
+  document.getElementById('vHead').textContent = cfg.head.toFixed(0)+' px';
+  document.getElementById('vBeams').textContent = cfg.beams;
+  document.getElementById('vStagger').textContent = cfg.stagger.toFixed(2)+'s';
+  document.getElementById('vColour').textContent = cfg.colour;
+  document.getElementById('vMonOp').textContent = cfg.monOpacity.toFixed(2);
+  document.getElementById('vGlowOp').textContent = cfg.glowOpacity.toFixed(2);
+  document.getElementById('vCoreOp').textContent = cfg.coreOpacity.toFixed(2);
+  setStatus('Preset loaded: ' + name, 'ok');
+}
+
+// V7 arc path: M 220 220 Q 590 -20 960 220 on viewBox 0 0 1180 440
+// Scale to source 1284x716. Source is 16:9, viewBox is wider-than-tall (1180/440 = 2.68).
+// Use proportional placement matching the V7 demo's layout (image centred in vstage with 12px padding ish — but in the original CSS the SVG fills the vstage). Let me map viewBox coordinates directly to canvas coordinates with the same aspect-ratio fit as the V7 demo (it uses preserveAspectRatio="none" → fills).
+function arcPathLength(){
+  // Approximate length of Q curve M(220,220) Q(590,-20) (960,220) — measured ~795 in the viewBox.
+  // We'll compute properly using SVGPathElement.getTotalLength via a hidden SVG.
+  return cachedPathLen;
+}
+
+// Build a hidden SVG to measure the path
+let cachedPathLen = 795;
+(function(){
+  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('viewBox','0 0 1180 440');
+  svg.style.position='absolute'; svg.style.left='-9999px'; svg.style.width='1180px'; svg.style.height='440px';
+  const p = document.createElementNS('http://www.w3.org/2000/svg','path');
+  p.setAttribute('d','M 220 220 Q 590 -20 960 220');
+  svg.appendChild(p);
+  document.body.appendChild(svg);
+  cachedPathLen = p.getTotalLength();
+  document.body.removeChild(svg);
+})();
+
+function drawComposite(tSec){
+  const W = canvas.width, H = canvas.height;
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0,0,W,H);
+
+  // 1. video frame
+  if (video.readyState >= 2 && !video.error) {
+    try { ctx.drawImage(video, 0, 0, W, H); } catch(e) {}
+  }
+
+  // 2. Laser arcs — draw N beams, each staggered by cfg.stagger seconds
+  const n = Math.max(1, Math.floor(cfg.beams));
+  for (let i = 0; i < n; i++){
+    const startOffset = i * cfg.stagger;
+    const lt = tSec - cfg.laserStart - startOffset;
+    if (lt < 0 || lt > cfg.laserDur) continue;
+    const progress = lt / cfg.laserDur;
+    drawLaserArc(progress);
+  }
+  drawMonitorFlash(tSec);
+}
+
+function drawLaserArc(p){
+  // V7 timing: 0..5% hold start; 5..60% travel; 60..100% gone
+  // We map to a single arc travel: head moves from start to end across p=0..1, then keeps going past end so dashoffset takes whole beam off the canvas. We use a fade-out at the end of the dur.
+  const W = canvas.width, H = canvas.height;
+  const scaleX = W / 1180;
+  const scaleY = H / 440;
+
+  // Build the path in canvas coords using same control points
+  const startX = 220 * scaleX, startY = 220 * scaleY;
+  const cpX    = 590 * scaleX, cpY    = -20 * scaleY;
+  const endX   = 960 * scaleX, endY   = 220 * scaleY;
+
+  ctx.save();
+  // glow layers
+  const layers = [
+    { blur: 24 * cfg.glow, alpha: 0.55 * cfg.glow, width: cfg.stroke * 4.5 },
+    { blur: 12 * cfg.glow, alpha: 0.8  * cfg.glow, width: cfg.stroke * 2.2 },
+    { blur: 5  * cfg.glow, alpha: 1.0,             width: cfg.stroke * 1.0 },
+  ];
+
+  // beam: simulate stroke-dasharray: 250 1500 ; offset travels from +headLen to -totalLen
+  // We replicate by computing visible arc segment via parametric sampling and drawing only that.
+  const totalLen = cachedPathLen * Math.min(scaleX, scaleY) / 1; // approximate avg-scale; for fill mode we use raw avg
+  const avgScale = (scaleX + scaleY) / 2;
+  const pathLenScaled = cachedPathLen * avgScale;
+  const headLen = cfg.head * avgScale;
+  // map progress 0..1 → head position from -headLen (off-screen left) to pathLenScaled + headLen (off-screen right)
+  const headPos = -headLen + (pathLenScaled + 2 * headLen) * p;
+  const segStart = Math.max(0, headPos - headLen);
+  const segEnd   = Math.max(0, Math.min(pathLenScaled, headPos));
+  if (segEnd <= segStart) { ctx.restore(); return; }
+
+  // fade-out near the end (last 12% of duration)
+  let alphaMul = 1;
+  if (p > 0.88) alphaMul = 1 - (p - 0.88) / 0.12;
+  if (p < 0.02) alphaMul = p / 0.02;
+
+  // Sample the path at fine resolution then draw the visible portion
+  const N = 200;
+  const pts = [];
+  for (let i = 0; i <= N; i++){
+    const t = i / N;
+    const x = (1-t)*(1-t)*startX + 2*(1-t)*t*cpX + t*t*endX;
+    const y = (1-t)*(1-t)*startY + 2*(1-t)*t*cpY + t*t*endY;
+    pts.push({x, y, t});
+  }
+  // compute cumulative arc length
+  const lens = [0];
+  for (let i = 1; i <= N; i++){
+    const dx = pts[i].x - pts[i-1].x;
+    const dy = pts[i].y - pts[i-1].y;
+    lens.push(lens[i-1] + Math.hypot(dx, dy));
+  }
+  const actualLen = lens[N];
+
+  // remap segStart/segEnd from path-len to fraction
+  const sStart = segStart * (actualLen / pathLenScaled);
+  const sEnd   = segEnd   * (actualLen / pathLenScaled);
+
+  // find index range
+  function lerpPoint(targetLen){
+    let i = 1;
+    while (i <= N && lens[i] < targetLen) i++;
+    if (i > N) return pts[N];
+    const u = (targetLen - lens[i-1]) / (lens[i] - lens[i-1] || 1);
+    return { x: pts[i-1].x + u * (pts[i].x - pts[i-1].x), y: pts[i-1].y + u * (pts[i].y - pts[i-1].y) };
+  }
+  const ptStart = lerpPoint(sStart);
+  const ptEnd   = lerpPoint(sEnd);
+
+  // build sub-curve points
+  const sub = [ptStart];
+  for (let i = 1; i <= N; i++){
+    if (lens[i] > sStart && lens[i] < sEnd) sub.push(pts[i]);
+  }
+  sub.push(ptEnd);
+
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  // helper to stroke sub
+  function strokeSub(){
+    ctx.beginPath();
+    ctx.moveTo(sub[0].x, sub[0].y);
+    for (let i = 1; i < sub.length; i++) ctx.lineTo(sub[i].x, sub[i].y);
+    ctx.stroke();
+  }
+
+  // Outer glow layers (teal) — modulated by laser glow opacity slider
+  ctx.strokeStyle = cfg.colour;
+  for (const L of layers.slice(0, 2)){
+    ctx.globalAlpha = L.alpha * alphaMul * cfg.glowOpacity;
+    ctx.lineWidth = L.width;
+    ctx.shadowColor = cfg.colour;
+    ctx.shadowBlur = L.blur;
+    strokeSub();
+  }
+  // Hot core (white) — modulated by laser core opacity slider
+  ctx.globalAlpha = 1 * alphaMul * cfg.coreOpacity;
+  ctx.lineWidth = layers[2].width;
+  ctx.shadowColor = cfg.colour;
+  ctx.shadowBlur = layers[2].blur;
+  ctx.strokeStyle = '#ffffff';
+  strokeSub();
+
+  ctx.restore();
+}
+
+function drawMonitorFlash(tSec){
+  // Flash fires when the LAST beam-head reaches the right phone.
+  // Last beam starts at cfg.laserStart + (beams-1)*stagger.
+  const lastBeamStart = cfg.laserStart + (Math.max(1, Math.floor(cfg.beams)) - 1) * cfg.stagger;
+  const flashTrigger = lastBeamStart + 0.6 * cfg.laserDur + cfg.flashDelay;
+  const flashHoldEnd = flashTrigger + 0.5;
+  const flashFadeEnd = flashTrigger + 1.2;
+  let opacity = 0;
+  if (tSec >= flashTrigger && tSec < flashHoldEnd) {
+    opacity = Math.min(1, (tSec - flashTrigger) * 8);
+  } else if (tSec >= flashHoldEnd && tSec < flashFadeEnd) {
+    opacity = 1 - (tSec - flashHoldEnd) / (flashFadeEnd - flashHoldEnd);
+  }
+  if (opacity <= 0) return;
+  const W = canvas.width, H = canvas.height;
+  ctx.save();
+  ctx.globalAlpha = opacity * cfg.monOpacity;
+  const cx = W * 0.79, cy = H * 0.49;
+  const r  = W * 0.18;
+  const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+  grad.addColorStop(0, cfg.colour);
+  grad.addColorStop(0.6, cfg.colour + '00');
+  grad.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = grad;
+  ctx.globalCompositeOperation = 'screen';
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+// Live loop
+let rafId = null;
+function tick(){
+  drawComposite(video.currentTime);
+  rafId = requestAnimationFrame(tick);
+}
+video.addEventListener('loadedmetadata', () => {
+  cfg.loopLen = video.duration;
+  setStatus('Loaded. Duration ' + cfg.loopLen.toFixed(2) + 's @ ' + video.videoWidth + 'x' + video.videoHeight);
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  video.loop = true;
+  video.play().then(()=>tick()).catch(e => setStatus('Click Play to start: ' + e.message, 'err'));
+});
+video.addEventListener('error', e => setStatus('Video load error. Check the source path.', 'err'));
+
+// Controls
+function bind(id, prop, fmt){
+  const i = document.getElementById(id);
+  const v = document.getElementById('v' + id.slice(1));
+  i.addEventListener('input', () => {
+    cfg[prop] = parseFloat(i.value);
+    v.textContent = fmt ? fmt(cfg[prop]) : cfg[prop];
+  });
+}
+bind('iStart','laserStart', x => x.toFixed(2)+'s');
+bind('iDur','laserDur', x => x.toFixed(2)+'s');
+bind('iFlash','flashDelay', x => (x>=0?'+':'') + x.toFixed(2)+'s');
+bind('iStroke','stroke', x => x.toFixed(1));
+bind('iGlowS','glow', x => x.toFixed(2));
+bind('iHead','head', x => x.toFixed(0)+' px');
+bind('iBeams','beams', x => Math.floor(x));
+bind('iStagger','stagger', x => x.toFixed(2)+'s');
+bind('iMonOp','monOpacity', x => x.toFixed(2));
+bind('iGlowOp','glowOpacity', x => x.toFixed(2));
+bind('iCoreOp','coreOpacity', x => x.toFixed(2));
+
+// Colour picker
+document.getElementById('iColour').addEventListener('input', e => {
+  cfg.colour = e.target.value;
+  document.getElementById('vColour').textContent = cfg.colour;
+  document.querySelectorAll('#swatch button').forEach(b => b.classList.remove('active'));
+});
+
+document.getElementById('swatch').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  document.querySelectorAll('#swatch button').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+  cfg.colour = b.dataset.c;
+  document.getElementById('iColour').value = cfg.colour;
+  document.getElementById('vColour').textContent = cfg.colour;
+});
+
+// Presets UI
+document.getElementById('presetSelect').addEventListener('change', e => {
+  if (e.target.value) applyPreset(e.target.value);
+});
+document.getElementById('btnPresetSave').addEventListener('click', () => {
+  const name = (document.getElementById('presetName').value || '').trim();
+  if (!name) { setStatus('Enter a preset name first', 'err'); return; }
+  const presets = loadPresets();
+  const snapshot = {};
+  PRESET_FIELDS.forEach(f => snapshot[f] = cfg[f]);
+  presets[name] = snapshot;
+  savePresets(presets);
+  refreshPresetSelect();
+  document.getElementById('presetSelect').value = name;
+  setStatus('Preset saved: ' + name, 'ok');
+});
+document.getElementById('btnPresetDel').addEventListener('click', () => {
+  const sel = document.getElementById('presetSelect');
+  const name = sel.value;
+  if (!name) { setStatus('Pick a preset to delete from the dropdown', 'err'); return; }
+  const presets = loadPresets();
+  delete presets[name];
+  savePresets(presets);
+  refreshPresetSelect();
+  setStatus('Preset deleted: ' + name, 'ok');
+});
+refreshPresetSelect();
+
+// Fullscreen
+document.getElementById('btnFullscreen').addEventListener('click', () => {
+  const el = document.querySelector('.canvas-frame');
+  if (!document.fullscreenElement) {
+    el.requestFullscreen().catch(e => setStatus('Fullscreen failed: ' + e.message, 'err'));
+  } else {
+    document.exitFullscreen();
+  }
+});
+document.getElementById('resToggle').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  document.querySelectorAll('#resToggle button').forEach(x => x.classList.remove('active'));
+  b.classList.add('active');
+  cfg.outW = parseInt(b.dataset.w);
+  cfg.outH = parseInt(b.dataset.h);
+});
+document.getElementById('btnPlay').addEventListener('click', () => video.play());
+document.getElementById('btnPause').addEventListener('click', () => video.pause());
+
+function setStatus(msg, cls){
+  statusEl.textContent = msg;
+  statusEl.className = 'status' + (cls ? ' ' + cls : '');
+}
+
+document.getElementById('btnSnap').addEventListener('click', () => {
+  const link = document.createElement('a');
+  link.download = 'anim-2-composite-frame-' + video.currentTime.toFixed(2) + 's.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+});
+
+// ─────── EXPORT (WebCodecs + mp4-muxer) ───────
+async function pickAvcCodec(W, H, FPS){
+  const candidates = ['avc1.640028','avc1.4d0028','avc1.42E028','avc1.42E01F'];
+  for (const codec of candidates){
+    try {
+      const r = await VideoEncoder.isConfigSupported({ codec, width: W, height: H, bitrate: 12_000_000, framerate: FPS });
+      if (r.supported) return codec;
+    } catch(e){}
+  }
+  return null;
+}
+
+document.getElementById('btnExport').addEventListener('click', async () => {
+  const btn = document.getElementById('btnExport');
+  btn.disabled = true;
+  setStatus('Preparing exporter...');
+  try {
+    const W = cfg.outW, H = cfg.outH, FPS = cfg.fps;
+    const duration = video.duration || cfg.loopLen;
+    const totalFrames = Math.ceil(duration * FPS);
+
+    // Switch canvas to export resolution
+    const prevW = canvas.width, prevH = canvas.height;
+    const oldDraw = canvas.cloneNode();
+    canvas.width = W;
+    canvas.height = H;
+
+    // Pause live loop
+    cancelAnimationFrame(rafId); rafId = null;
+    video.pause();
+
+    const codec = await pickAvcCodec(W, H, FPS);
+    if (!codec) throw new Error('No supported H.264 codec found in this browser. Try Chrome.');
+
+    const { Muxer, ArrayBufferTarget } = await import('https://cdn.jsdelivr.net/npm/mp4-muxer@5.2.1/+esm');
+    const muxer = new Muxer({
+      target: new ArrayBufferTarget(),
+      video: { codec: 'avc', width: W, height: H, frameRate: FPS },
+      fastStart: 'in-memory',
+    });
+    const encoder = new VideoEncoder({
+      output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
+      error: e => { console.error(e); setStatus('Encoder error: ' + e.message, 'err'); },
+    });
+    encoder.configure({ codec, width: W, height: H, bitrate: 12_000_000, framerate: FPS });
+
+    // Seek-and-draw loop. Use HTMLVideoElement.currentTime + seeked event for frame-accurate sample.
+    setStatus('Rendering ' + totalFrames + ' frames @ ' + W + 'x' + H + '...');
+
+    for (let i = 0; i <= totalFrames; i++){
+      const t = i / FPS;
+      // seek video
+      await new Promise((resolve, reject) => {
+        let to = null;
+        const onSeeked = () => { video.removeEventListener('seeked', onSeeked); if (to) clearTimeout(to); resolve(); };
+        video.addEventListener('seeked', onSeeked);
+        video.currentTime = Math.min(t, duration - 0.001);
+        to = setTimeout(() => { video.removeEventListener('seeked', onSeeked); resolve(); }, 1500);
+      });
+      // give the decoder a tick to surface the frame
+      await new Promise(r => setTimeout(r, 0));
+
+      drawComposite(t);
+
+      const frame = new VideoFrame(canvas, {
+        timestamp: Math.round(i * 1e6 / FPS),
+        duration:  Math.round(1e6 / FPS),
+      });
+      encoder.encode(frame, { keyFrame: (i % 30) === 0 });
+      frame.close();
+
+      if (i % 6 === 0){
+        setStatus('Rendering frame ' + i + ' / ' + totalFrames + '  (' + (100*i/totalFrames).toFixed(0) + '%)');
+        await new Promise(r => setTimeout(r, 0));
+      }
+    }
+
+    setStatus('Flushing encoder...');
+    await encoder.flush();
+    muxer.finalize();
+
+    const blob = new Blob([muxer.target.buffer], { type: 'video/mp4' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const stamp = new Date().toISOString().slice(0,16).replace(/[-:T]/g,'');
+    link.download = 'anim-2-shopify-v7-composite-' + stamp + '.mp4';
+    link.href = url;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+
+    // restore live preview
+    canvas.width = prevW; canvas.height = prevH;
+    video.currentTime = 0;
+    await video.play();
+    tick();
+    setStatus('✓ Exported ' + (blob.size/1024/1024).toFixed(2) + ' MB. ' + totalFrames + ' frames @ ' + W + 'x' + H + ' / ' + FPS + 'fps.', 'ok');
+  } catch (e){
+    console.error(e);
+    setStatus('Export failed: ' + e.message + '\n\nTip: WebCodecs MP4 export requires Chrome/Edge.', 'err');
+    // restore
+    if (!rafId) { try { await video.play(); } catch(_){} tick(); }
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+// ─────── EXPORT WebM (WebCodecs VP9 + webm-muxer) ───────
+async function pickVp9Codec(W, H, FPS){
+  const candidates = ['vp09.00.51.08','vp09.00.50.08','vp09.00.40.08','vp09.00.31.08','vp09.00.20.08','vp09.00.10.08'];
+  for (const codec of candidates){
+    try {
+      const r = await VideoEncoder.isConfigSupported({ codec, width: W, height: H, bitrate: 6_000_000, framerate: FPS });
+      if (r.supported) return codec;
+    } catch(e){}
+  }
+  return null;
+}
+
+document.getElementById('btnExportWebM').addEventListener('click', async () => {
+  const btn = document.getElementById('btnExportWebM');
+  btn.disabled = true;
+  setStatus('Preparing WebM exporter...');
+  try {
+    const W = cfg.outW, H = cfg.outH, FPS = cfg.fps;
+    const duration = video.duration || cfg.loopLen;
+    const totalFrames = Math.ceil(duration * FPS);
+
+    const prevW = canvas.width, prevH = canvas.height;
+    canvas.width = W; canvas.height = H;
+    cancelAnimationFrame(rafId); rafId = null;
+    video.pause();
+
+    const codec = await pickVp9Codec(W, H, FPS);
+    if (!codec) throw new Error('No supported VP9 codec in this browser. Try Chrome/Edge.');
+
+    const { Muxer, ArrayBufferTarget } = await import('https://cdn.jsdelivr.net/npm/webm-muxer@5.0.3/+esm');
+    const muxer = new Muxer({
+      target: new ArrayBufferTarget(),
+      video: { codec: 'V_VP9', width: W, height: H, frameRate: FPS },
+    });
+    const encoder = new VideoEncoder({
+      output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
+      error: e => { console.error(e); setStatus('Encoder error: ' + e.message, 'err'); },
+    });
+    encoder.configure({ codec, width: W, height: H, bitrate: 6_000_000, framerate: FPS });
+
+    setStatus('Rendering WebM ' + totalFrames + ' frames @ ' + W + 'x' + H + '...');
+
+    for (let i = 0; i <= totalFrames; i++){
+      const t = i / FPS;
+      await new Promise(resolve => {
+        let to = null;
+        const onSeeked = () => { video.removeEventListener('seeked', onSeeked); if (to) clearTimeout(to); resolve(); };
+        video.addEventListener('seeked', onSeeked);
+        video.currentTime = Math.min(t, duration - 0.001);
+        to = setTimeout(() => { video.removeEventListener('seeked', onSeeked); resolve(); }, 1500);
+      });
+      await new Promise(r => setTimeout(r, 0));
+      drawComposite(t);
+      const frame = new VideoFrame(canvas, {
+        timestamp: Math.round(i * 1e6 / FPS),
+        duration: Math.round(1e6 / FPS),
+      });
+      encoder.encode(frame, { keyFrame: (i % 30) === 0 });
+      frame.close();
+      if (i % 6 === 0){
+        setStatus('Rendering WebM frame ' + i + ' / ' + totalFrames + '  (' + (100*i/totalFrames).toFixed(0) + '%)');
+        await new Promise(r => setTimeout(r, 0));
+      }
+    }
+
+    setStatus('Flushing WebM encoder...');
+    await encoder.flush();
+    muxer.finalize();
+
+    const blob = new Blob([muxer.target.buffer], { type: 'video/webm' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    const stamp = new Date().toISOString().slice(0,16).replace(/[-:T]/g,'');
+    link.download = 'anim-2-shopify-v7-composite-' + stamp + '.webm';
+    link.href = url;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+
+    canvas.width = prevW; canvas.height = prevH;
+    video.currentTime = 0;
+    await video.play(); tick();
+    setStatus('✓ Exported WebM ' + (blob.size/1024/1024).toFixed(2) + ' MB. ' + totalFrames + ' frames.', 'ok');
+  } catch (e){
+    console.error(e);
+    setStatus('WebM export failed: ' + e.message, 'err');
+    if (!rafId) { try { await video.play(); } catch(_){} tick(); }
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+// keyboard shortcuts (no plain C — Ctrl+C must keep working)
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (e.key === ' '){ e.preventDefault(); if (video.paused) video.play(); else video.pause(); }
+  if (e.key === 'e' || e.key === 'E') document.getElementById('btnExport').click();
+  if (e.key === 's' || e.key === 'S') document.getElementById('btnSnap').click();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GemIQ — Anim 4 — Phone-light 360° spin (full 5-clip stitch)</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #fafafa; color: #1f2937; font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 820px; margin: 0 auto; padding: 40px 24px 80px; }
+  header { padding-bottom: 18px; border-bottom: 1px solid #e5e7eb; margin-bottom: 28px; }
+  .crumb { display: inline-block; font-size: 11px; color: #1cb4c0; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; margin-bottom: 8px; }
+  h1 { font-size: 22px; font-weight: 700; margin: 0 0 8px; letter-spacing: -0.01em; }
+  p.sub { margin: 0; color: #6b7280; font-size: 13.5px; line-height: 1.55; max-width: 640px; }
+
+  .stage { width: min(420px, 100%); aspect-ratio: 9/16; margin: 0 auto; background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.08); border: 1px solid #f1f5f9; position: relative; }
+  .stage video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; display: block; background: #fff; opacity: 0; }
+  .stage video.active { opacity: 1; }
+
+  .now { text-align: center; margin-top: 14px; font-size: 11px; color: #9ca3af; letter-spacing: 0.08em; text-transform: uppercase; }
+  .now span { color: #1cb4c0; font-weight: 700; }
+  .progress { margin: 12px auto 0; max-width: 420px; display: flex; gap: 4px; }
+  .progress .dot { flex: 1; height: 4px; background: #e5e7eb; border-radius: 2px; transition: background 0.2s; }
+  .progress .dot.active { background: #1cb4c0; }
+  .progress .dot.played { background: #94a3b8; }
+
+  .controls { margin-top: 20px; text-align: center; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .controls button { padding: 9px 16px; border-radius: 8px; border: 1px solid #d1d5db; background: #fff; cursor: pointer; font-size: 12.5px; color: #374151; font-weight: 500; }
+  .controls button:hover { background: #f9fafb; }
+  .controls button.primary { background: #1cb4c0; color: #fff; border-color: #1cb4c0; }
+  .controls button.toggle.on { background: #22c55e; color: #fff; border-color: #22c55e; }
+
+  .meta { margin-top: 28px; padding: 18px 22px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; font-size: 13px; line-height: 1.6; color: #4b5563; }
+  .meta b { color: #1f2937; }
+  .meta ol { margin: 8px 0 0; padding-left: 22px; }
+  .meta li { margin: 4px 0; font-variant-numeric: tabular-nums; }
+  .meta li.current { color: #1cb4c0; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header>
+    <span class="crumb">GemIQ · Animation 4 · full stitch</span>
+    <h1>Phone-light 360° spin → in-hand catch</h1>
+    <p class="sub">All 5 Kling clips played back-to-back in your requested order: front → side-controls → 3/4 → side-back → top-down → in-hand. Each clip is 5s @ 9:16 (Kling 3.0 std). Total ≈ 25s of motion — to be trimmed down to the 4–6s loop after picking the strongest segments.</p>
+  </header>
+
+  <div class="stage" id="stage">
+    <video id="v0" src="01-gens/anim-4-phone-spin/01_front-to-side-controls.mp4" class="active" autoplay muted playsinline></video>
+    <video id="v1" src="01-gens/anim-4-phone-spin/02_side-controls-to-three-quarter.mp4" muted playsinline></video>
+    <video id="v2" src="01-gens/anim-4-phone-spin/03_three-quarter-to-side-back.mp4" muted playsinline></video>
+    <video id="v3" src="01-gens/anim-4-phone-spin/04_side-back-to-top-down.mp4" muted playsinline></video>
+    <video id="v4" src="01-gens/anim-4-phone-spin/05_top-down-to-in-hand_v2-pro_900x1020.mp4" muted playsinline></video>
+  </div>
+
+  <div class="now">Now playing: <span id="nowEl">Clip 1 — front → side-controls</span></div>
+
+  <div class="progress" id="progress">
+    <div class="dot active"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+
+  <div class="controls">
+    <button id="restartBtn" class="primary">↻ Restart</button>
+    <button id="loopBtn" class="toggle on">⟳ Loop (on)</button>
+  </div>
+
+  <div class="meta">
+    <b>Sequence order:</b>
+    <ol id="metaList">
+      <li>K1 (front-off) → K3 (side controls)</li>
+      <li>K3 (side controls) → K2 (3/4)</li>
+      <li>K2 (3/4) → K4 (side back)</li>
+      <li>K4 (side back) → K5 (top-down)</li>
+      <li>K5 (top-down) → K7 (in-hand catch) — <b>v2 PRO 5s</b> (re-fired 2026-05-24, stronger no-teleport prompt)</li>
+    </ol>
+    <br>
+    <b>Files saved to:</b> <code>01-gens/anim-4-phone-spin/</code> as <code>01_..</code>–<code>05_..</code>.mp4.
+  </div>
+
+</div>
+
+<script>
+  const videos = [
+    { el: document.getElementById('v0'), name: 'Clip 1 — front → side-controls' },
+    { el: document.getElementById('v1'), name: 'Clip 2 — side-controls → 3/4' },
+    { el: document.getElementById('v2'), name: 'Clip 3 — 3/4 → side-back' },
+    { el: document.getElementById('v3'), name: 'Clip 4 — side-back → top-down' },
+    { el: document.getElementById('v4'), name: 'Clip 5 — top-down → in-hand catch' }
+  ];
+  const dots = document.querySelectorAll('#progress .dot');
+  const metaItems = document.querySelectorAll('#metaList li');
+  const nowEl = document.getElementById('nowEl');
+  const restartBtn = document.getElementById('restartBtn');
+  const loopBtn = document.getElementById('loopBtn');
+
+  let currentIdx = 0;
+  let looping = true;
+
+  function showClip(idx) {
+    videos.forEach((v, i) => {
+      v.el.classList.toggle('active', i === idx);
+      if (i !== idx) { v.el.pause(); v.el.currentTime = 0; }
+    });
+    dots.forEach((d, i) => {
+      d.classList.toggle('active', i === idx);
+      d.classList.toggle('played', i < idx);
+    });
+    metaItems.forEach((li, i) => li.classList.toggle('current', i === idx));
+    nowEl.textContent = videos[idx].name;
+    currentIdx = idx;
+    videos[idx].el.currentTime = 0;
+    videos[idx].el.play();
+  }
+
+  videos.forEach((v, i) => {
+    v.el.addEventListener('ended', () => {
+      if (i < videos.length - 1) {
+        showClip(i + 1);
+      } else if (looping) {
+        showClip(0);
+      } else {
+        nowEl.textContent = 'Sequence finished (loop off)';
+      }
+    });
+  });
+
+  restartBtn.addEventListener('click', () => showClip(0));
+  loopBtn.addEventListener('click', () => {
+    looping = !looping;
+    loopBtn.textContent = looping ? '⟳ Loop (on)' : '⟳ Loop (off)';
+    loopBtn.classList.toggle('on', looping);
+  });
+
+  // Click a progress dot to jump
+  dots.forEach((d, i) => {
+    d.style.cursor = 'pointer';
+    d.addEventListener('click', () => showClip(i));
+  });
+</script>
+
+</body>
+</html>
